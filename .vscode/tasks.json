@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve MkDocs",
+			"type": "shell",
+			"command": "mkdocs",
+			"args": [
+				"serve"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

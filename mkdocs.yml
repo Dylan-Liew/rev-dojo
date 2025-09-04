@@ -1,0 +1,68 @@
+site_name: Rev-Dojo
+site_url: https://dylan-liew.github.io/rev-dojo/
+use_directory_urls: true
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.highlight:
+      use_pygments: true
+      linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+
+nav:
+  - 'Home': 'index.md'
+  - 'Foundations':
+    - 'C Programming Essentials I': 'foundations/01-c-essentials-i.md'
+    - 'C Programming Essentials II': 'foundations/01-c-essentials-ii.md'
+    - 'Compilation Process': 'foundations/02-compilation.md'
+  # - 'Assembly Basics': 'foundations/03-assembly.md'
+  #   - 'Memory Management': 'foundations/04-memory.md'
+  # - 'Reverse Engineering':
+  #   - 'Static Analysis':
+  #     - 'Disassemblers': 'reverse-engineering/static/01-disassemblers.md'
+  #     - 'Control Flow & Functions': 'reverse-engineering/static/02-control-flow.md'
+  #     - 'String & Symbol Analysis': 'reverse-engineering/static/03-strings-symbols.md'
+  #   - 'Dynamic Analysis':
+  #     - 'GDB + PEDA/Pwndbg': 'reverse-engineering/dynamic/01-gdb-basics.md'
+  #     - 'Debugging Techniques': 'reverse-engineering/dynamic/02-debugging.md'
+  #     - 'Binary Patching': 'reverse-engineering/dynamic/03-patching.md'
+  #   - 'Symbolic Execution': 'reverse-engineering/01-symbolic-execution.md'
+  # - 'Binary Exploitation':
+  #   - 'Fundamentals':
+  #     - 'Introduction to pwntools': 'binary-exploitation/fundamentals/01-pwntools.md'
+  #     - 'Buffer Overflows': 'binary-exploitation/fundamentals/02-buffer-overflow.md'
+  #     - 'Shellcode Development': 'binary-exploitation/fundamentals/03-shellcode.md'
+  #   - 'Memory Corruption':
+  #     - 'Format String Attacks': 'binary-exploitation/memory/01-format-string.md'
+  #     - 'Array Indexing': 'binary-exploitation/memory/02-array-indexing.md'
+  #     - 'Integer Overflow': 'binary-exploitation/memory/03-integer-overflow.md'
+  #   - 'Protection Bypasses':
+  #     - 'Understanding Mitigations': 'binary-exploitation/protection/01-mitigations.md'
+  #     - 'Stack Canary Bypass': 'binary-exploitation/protection/02-canary-bypass.md'
+  #     - 'Return-to-libc': 'binary-exploitation/protection/03-ret2libc.md'
+  #   - 'Advanced Exploitation':
+  #     - 'ROP Techniques': 'binary-exploitation/advanced/01-rop.md'
+  #     - 'Heap Exploitation': 'binary-exploitation/advanced/02-heap.md'
+  #     - 'Modern Techniques': 'binary-exploitation/advanced/03-modern.md'
+
+theme:
+  name: material
+  logo: null
+  features:
+    - navigation.instant
+    - navigation.sections
+    - search.highlight
+  palette:
+    - scheme: slate
+      primary: black
+      accent: blue
+
+extra_css:
+  - assets/custom.css
