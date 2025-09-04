@@ -1,0 +1,2298 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/foundations/02-compilation/">
+      
+      
+        <link rel="prev" href="../01-c-essentials-ii/">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Compilation Process - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#compilation-process" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Compilation Process
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-of-compilation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of Compilation Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preprocessing-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-preprocessor-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the Preprocessor Does
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compilation-to-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compilation to Assembly
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compilation to Assembly">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compilation-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compilation Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-assembly-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Assembly Output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compiler-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compiler Optimizations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assembly Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assembly Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assembly-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assembly Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#object-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Object File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#symbol-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symbol Tables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linking-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linking Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linking Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Linking
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Linking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#static-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static Linking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Linking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linking-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linking Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-multi-file-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Multi-File Project
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-and-using-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Using Libraries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating and Using Libraries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#static-libraries-a-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static Libraries (.a files)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shared-libraries-so-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared Libraries (.so files)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Systems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#makefiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Makefiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      CMake Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug-symbols" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug Symbols
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-debug-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Debug Formats
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Compilation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Compilation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#targeting-different-architectures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Targeting Different Architectures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-gcc-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common GCC Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common GCC Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#library-and-linking-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Library and Linking Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-and-profiling-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug and Profiling Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-and-error-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning and Error Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optimization Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-and-platform-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture and Platform Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-hardening-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and Hardening Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-standard-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Language Standard Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-and-analysis-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging and Analysis Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-of-compilation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview of Compilation Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preprocessing-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-preprocessor-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      What the Preprocessor Does
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compilation-to-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compilation to Assembly
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compilation to Assembly">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compilation-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compilation Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-assembly-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Assembly Output
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compiler-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compiler Optimizations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assembly Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assembly Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assembly-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assembly Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#object-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Object File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#symbol-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symbol Tables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linking-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linking Stage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Linking Stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Linking
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Linking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#static-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static Linking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Linking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linking-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linking Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-multi-file-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Multi-File Project
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-and-using-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Using Libraries
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating and Using Libraries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#static-libraries-a-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static Libraries (.a files)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shared-libraries-so-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared Libraries (.so files)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Systems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#makefiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Makefiles
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      CMake Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debug-symbols" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug Symbols
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#different-debug-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Different Debug Formats
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Compilation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Compilation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#targeting-different-architectures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Targeting Different Architectures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-gcc-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common GCC Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common GCC Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#output-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#library-and-linking-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Library and Linking Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-and-profiling-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug and Profiling Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warning-and-error-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Warning and Error Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optimization Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-and-platform-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture and Platform Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-hardening-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and Hardening Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-standard-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Language Standard Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-and-analysis-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging and Analysis Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="compilation-process">Compilation Process</h1>
+<h2 id="overview-of-compilation-pipeline">Overview of Compilation Pipeline</h2>
+<div align="center">
+
+<pre class="mermaid"><code>graph TD
+    A[Source Code .c] --&gt; B[Preprocessor cpp]
+    B --&gt; C[Preprocessed .i]
+    C --&gt; D[Compiler cc1]
+    D --&gt; E[Assembly .s]
+    E --&gt; F[Assembler as]
+    F --&gt; G[Object File .o]
+    G --&gt; H[Linker ld]
+    H --&gt; I[Executable]</code></pre>
+
+</div>
+
+<h2 id="preprocessing-stage">Preprocessing Stage</h2>
+<p>The preprocessor handles directives that start with <code>#</code>.</p>
+<h3 id="example-program">Example Program</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// main.c</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+
+<span class="cp">#define MAX_SIZE 100</span>
+<span class="cp">#define SQUARE(x) ((x) * (x))</span>
+
+<span class="cp">#ifdef DEBUG</span>
+<span class="w">    </span><span class="cp">#define DBG_PRINT(x) printf(&quot;Debug: %s\n&quot;, x)</span>
+<span class="cp">#else</span>
+<span class="w">    </span><span class="cp">#define DBG_PRINT(x)</span>
+<span class="cp">#endif</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MAX_SIZE</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">area</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SQUARE</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">DBG_PRINT</span><span class="p">(</span><span class="s">&quot;Starting program&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Size: %d, Area: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="n">area</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="preprocessing-commands">Preprocessing Commands</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># View preprocessed output</span>
+gcc<span class="w"> </span>-E<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.i
+
+<span class="c1"># Or directly to stdout</span>
+gcc<span class="w"> </span>-E<span class="w"> </span>main.c
+
+<span class="c1"># With debug symbols</span>
+gcc<span class="w"> </span>-E<span class="w"> </span>-DDEBUG<span class="w"> </span>main.c
+</code></pre></div></td></tr></table></div>
+<h3 id="what-the-preprocessor-does">What the Preprocessor Does</h3>
+<ol>
+<li><strong>File Inclusion</strong>: Replaces <code>#include</code> with file contents</li>
+<li><strong>Macro Expansion</strong>: Substitutes <code>#define</code> macros</li>
+<li><strong>Conditional Compilation</strong>: Processes <code>#ifdef</code>, <code>#ifndef</code>, <code>#if</code></li>
+<li><strong>Comment Removal</strong>: Strips out comments</li>
+<li><strong>Line Numbering</strong>: Adds line directives for debugging</li>
+</ol>
+<h2 id="compilation-to-assembly">Compilation to Assembly</h2>
+<p>The compiler translates preprocessed C into assembly language.</p>
+<h3 id="compilation-commands">Compilation Commands</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile to assembly</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.s
+$<span class="w"> </span>ls<span class="w"> </span>-l
+
+<span class="c1"># View with different optimization levels</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>-O0<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_O0.s<span class="w">    </span><span class="c1"># No optimization</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>-O1<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_O1.s<span class="w">    </span><span class="c1"># Basic optimization</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>-O2<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_O2.s<span class="w">    </span><span class="c1"># More optimization</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>-O3<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_O3.s<span class="w">    </span><span class="c1"># Aggressive optimization</span>
+
+<span class="c1"># Generate assembly with debugging info</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>-g<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_debug.s
+</code></pre></div></td></tr></table></div>
+<h3 id="example-assembly-output">Example Assembly Output</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># main.s (simplified x86_64)</span>
+<span class="na">.file</span><span class="w">   </span><span class="s">&quot;main.c&quot;</span>
+<span class="na">.text</span>
+<span class="na">.globl</span><span class="w">  </span><span class="no">main</span>
+<span class="na">.type</span><span class="w">   </span><span class="no">main</span><span class="p">,</span><span class="w"> </span><span class="na">@function</span>
+
+<span class="nl">main:</span>
+<span class="nl">.LFB0:</span>
+<span class="w">    </span><span class="nf">pushq</span><span class="w">   </span><span class="nv">%rbp</span>
+<span class="w">    </span><span class="nf">movq</span><span class="w">    </span><span class="nv">%rsp</span><span class="p">,</span><span class="w"> </span><span class="nv">%rbp</span>
+<span class="w">    </span><span class="nf">subq</span><span class="w">    </span><span class="no">$16</span><span class="p">,</span><span class="w"> </span><span class="nv">%rsp</span>
+
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="no">$100</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span><span class="w">      </span><span class="c1"># size = MAX_SIZE (100)</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="no">$100</span><span class="p">,</span><span class="w"> </span><span class="mi">-8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span><span class="w">      </span><span class="c1"># area = SQUARE(10) = 100</span>
+
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="mi">-8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span><span class="w"> </span><span class="nv">%edx</span><span class="w">      </span><span class="c1"># Load area</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="mi">-4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span><span class="w"> </span><span class="nv">%esi</span><span class="w">      </span><span class="c1"># Load size</span>
+<span class="w">    </span><span class="nf">leaq</span><span class="w">    </span><span class="no">.LC0</span><span class="p">(</span><span class="nv">%rip</span><span class="p">),</span><span class="w"> </span><span class="nv">%rdi</span><span class="w">    </span><span class="c1"># Load format string</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="no">$0</span><span class="p">,</span><span class="w"> </span><span class="nv">%eax</span>
+<span class="w">    </span><span class="nf">call</span><span class="w">    </span><span class="no">printf@PLT</span>
+
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="no">$0</span><span class="p">,</span><span class="w"> </span><span class="nv">%eax</span><span class="w">            </span><span class="c1"># return 0</span>
+<span class="w">    </span><span class="nf">leave</span>
+<span class="w">    </span><span class="nf">ret</span>
+
+<span class="na">.section</span><span class="w"> </span><span class="no">.rodata</span>
+<span class="nl">.LC0:</span>
+<span class="w">    </span><span class="na">.string</span><span class="w"> </span><span class="s">&quot;Size: %d, Area: %d\n&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="compiler-optimizations">Compiler Optimizations</h3>
+<p>Different optimization levels produce vastly different assembly:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// test.c</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">add_numbers</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">temp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">temp</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add_numbers</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>-O0 (No optimization):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">add_numbers:</span>
+<span class="w">    </span><span class="nf">pushq</span><span class="w">   </span><span class="nv">%rbp</span>
+<span class="w">    </span><span class="nf">movq</span><span class="w">    </span><span class="nv">%rsp</span><span class="p">,</span><span class="w"> </span><span class="nv">%rbp</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="nv">%edi</span><span class="p">,</span><span class="w"> </span><span class="mi">-20</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="nv">%esi</span><span class="p">,</span><span class="w"> </span><span class="mi">-16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="mi">-20</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span><span class="w"> </span><span class="nv">%edx</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="mi">-16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span><span class="w"> </span><span class="nv">%eax</span>
+<span class="w">    </span><span class="nf">addl</span><span class="w">    </span><span class="nv">%edx</span><span class="p">,</span><span class="w"> </span><span class="nv">%eax</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="nv">%eax</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+<span class="w">    </span><span class="nf">movl</span><span class="w">    </span><span class="mi">-4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span><span class="w"> </span><span class="nv">%eax</span>
+<span class="w">    </span><span class="nf">popq</span><span class="w">    </span><span class="nv">%rbp</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>-O2 (Optimized):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">add_numbers:</span>
+<span class="w">    </span><span class="nf">leal</span><span class="w">    </span><span class="p">(</span><span class="nv">%rdi</span><span class="p">,</span><span class="nv">%rsi</span><span class="p">),</span><span class="w"> </span><span class="nv">%eax</span><span class="w">    </span><span class="c1"># Just lea instruction!</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<h2 id="assembly-stage">Assembly Stage</h2>
+<p>The assembler converts assembly language into machine code.</p>
+<h3 id="assembly-commands">Assembly Commands</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Assemble to object file</span>
+as<span class="w"> </span>main.s<span class="w"> </span>-o<span class="w"> </span>main.o
+
+<span class="c1"># Or using gcc</span>
+gcc<span class="w"> </span>-c<span class="w"> </span>main.s<span class="w"> </span>-o<span class="w"> </span>main.o
+
+<span class="c1"># View object file contents</span>
+objdump<span class="w"> </span>-d<span class="w"> </span>main.o<span class="w">       </span><span class="c1"># Disassemble</span>
+objdump<span class="w"> </span>-t<span class="w"> </span>main.o<span class="w">       </span><span class="c1"># Symbol table</span>
+objdump<span class="w"> </span>-h<span class="w"> </span>main.o<span class="w">       </span><span class="c1"># Section headers</span>
+readelf<span class="w"> </span>-a<span class="w"> </span>main.o<span class="w">       </span><span class="c1"># ELF file analysis</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="object-file-structure">Object File Structure</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Examine sections</span>
+$<span class="w"> </span>objdump<span class="w"> </span>-h<span class="w"> </span>main.o
+
+Sections:
+Idx<span class="w"> </span>Name<span class="w">          </span>Size<span class="w">      </span>VMA<span class="w">               </span>LMA<span class="w">               </span>File<span class="w"> </span>off<span class="w">  </span>Algn
+<span class="w">  </span><span class="m">0</span><span class="w"> </span>.text<span class="w">         </span><span class="m">00000035</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">00000040</span><span class="w">  </span><span class="m">2</span>**0
+<span class="w">  </span><span class="m">1</span><span class="w"> </span>.data<span class="w">         </span><span class="m">00000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">00000075</span><span class="w">  </span><span class="m">2</span>**0
+<span class="w">  </span><span class="m">2</span><span class="w"> </span>.bss<span class="w">          </span><span class="m">00000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">00000075</span><span class="w">  </span><span class="m">2</span>**0
+<span class="w">  </span><span class="m">3</span><span class="w"> </span>.rodata<span class="w">       </span><span class="m">00000014</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">0000000000000000</span><span class="w">  </span><span class="m">00000075</span><span class="w">  </span><span class="m">2</span>**0
+</code></pre></div></td></tr></table></div>
+<h3 id="symbol-tables">Symbol Tables</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># View symbols</span>
+$<span class="w"> </span>objdump<span class="w"> </span>-t<span class="w"> </span>main.o
+
+SYMBOL<span class="w"> </span>TABLE:
+<span class="m">0000000000000000</span><span class="w"> </span>l<span class="w">    </span>df<span class="w"> </span>*ABS*<span class="w">  </span><span class="m">0000000000000000</span><span class="w"> </span>main.c
+<span class="m">0000000000000000</span><span class="w"> </span>l<span class="w">    </span>d<span class="w">  </span>.text<span class="w">  </span><span class="m">0000000000000000</span><span class="w"> </span>.text
+<span class="m">0000000000000000</span><span class="w"> </span>l<span class="w">    </span>d<span class="w">  </span>.rodata<span class="w">        </span><span class="m">0000000000000000</span><span class="w"> </span>.rodata
+<span class="m">0000000000000000</span><span class="w"> </span>g<span class="w">     </span>F<span class="w"> </span>.text<span class="w">  </span><span class="m">0000000000000035</span><span class="w"> </span>main
+<span class="m">0000000000000000</span><span class="w">         </span>*UND*<span class="w">  </span><span class="m">0000000000000000</span><span class="w"> </span><span class="nb">printf</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="linking-stage">Linking Stage</h2>
+<p>The linker combines object files and libraries into a final executable.</p>
+<h3 id="types-of-linking">Types of Linking</h3>
+<h4 id="static-linking">Static Linking</h4>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Static linking (includes library code in executable)</span>
+gcc<span class="w"> </span>-static<span class="w"> </span>main.o<span class="w"> </span>-o<span class="w"> </span>main_static
+
+<span class="c1"># Check size difference</span>
+ls<span class="w"> </span>-la<span class="w"> </span>main_static<span class="w"> </span>main_dynamic
+</code></pre></div></td></tr></table></div>
+<h4 id="dynamic-linking">Dynamic Linking</h4>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Dynamic linking (default)</span>
+gcc<span class="w"> </span>main.o<span class="w"> </span>-o<span class="w"> </span>main_dynamic
+
+<span class="c1"># View dynamic dependencies</span>
+ldd<span class="w"> </span>main_dynamic
+</code></pre></div></td></tr></table></div>
+<h3 id="linking-process">Linking Process</h3>
+<ol>
+<li><strong>Symbol Resolution</strong>: Match function calls to definitions</li>
+<li><strong>Relocation</strong>: Adjust addresses for final memory layout</li>
+<li><strong>Section Merging</strong>: Combine similar sections from different objects</li>
+<li><strong>Entry Point Setting</strong>: Set program start address</li>
+</ol>
+<h3 id="example-multi-file-project">Example Multi-File Project</h3>
+<p><strong>math.h:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="cp">#ifndef MATH_H</span>
+<span class="cp">#define MATH_H</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+
+<span class="cp">#endif</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>math.c:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;math.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>main.c:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;math.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">multiply</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Sum: %d, Product: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="p">,</span><span class="w"> </span><span class="n">product</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Compilation Process:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile each source file to object file</span>
+gcc<span class="w"> </span>-c<span class="w"> </span>math.c<span class="w"> </span>-o<span class="w"> </span>math.o
+gcc<span class="w"> </span>-c<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.o
+
+<span class="c1"># Link object files</span>
+gcc<span class="w"> </span>math.o<span class="w"> </span>main.o<span class="w"> </span>-o<span class="w"> </span>program
+
+<span class="c1"># Or do it all in one step</span>
+gcc<span class="w"> </span>math.c<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>program
+</code></pre></div></td></tr></table></div></p>
+<h2 id="creating-and-using-libraries">Creating and Using Libraries</h2>
+<h3 id="static-libraries-a-files">Static Libraries (.a files)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create static library</span>
+ar<span class="w"> </span>rcs<span class="w"> </span>libmath.a<span class="w"> </span>math.o
+
+<span class="c1"># Link with static library</span>
+gcc<span class="w"> </span>main.o<span class="w"> </span>-L.<span class="w"> </span>-lmath<span class="w"> </span>-o<span class="w"> </span>program_static
+
+<span class="c1"># Or specify full path</span>
+gcc<span class="w"> </span>main.o<span class="w"> </span>libmath.a<span class="w"> </span>-o<span class="w"> </span>program_static
+</code></pre></div></td></tr></table></div>
+<h3 id="shared-libraries-so-files">Shared Libraries (.so files)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create shared library</span>
+gcc<span class="w"> </span>-shared<span class="w"> </span>-fPIC<span class="w"> </span>math.c<span class="w"> </span>-o<span class="w"> </span>libmath.so
+
+<span class="c1"># Link with shared library</span>
+gcc<span class="w"> </span>main.o<span class="w"> </span>-L.<span class="w"> </span>-lmath<span class="w"> </span>-o<span class="w"> </span>program_shared
+
+<span class="c1"># Run with shared library (if not in standard path)</span>
+<span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span>.<span class="w"> </span>./program_shared
+</code></pre></div></td></tr></table></div>
+<h2 id="build-systems">Build Systems</h2>
+<h3 id="makefiles">Makefiles</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c"># Makefile</span>
+<span class="nv">CC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>gcc
+<span class="nv">CFLAGS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>-Wall<span class="w"> </span>-Wextra<span class="w"> </span>-g
+<span class="nv">OBJECTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>main.o<span class="w"> </span>math.o
+<span class="nv">TARGET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>program
+
+<span class="nf">$(TARGET)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span><span class="k">$(</span>OBJECTS<span class="k">)</span><span class="w"> </span>-o<span class="w"> </span><span class="k">$(</span>TARGET<span class="k">)</span>
+
+<span class="nf">main.o</span><span class="o">:</span><span class="w"> </span><span class="n">main</span>.<span class="n">c</span> <span class="n">math</span>.<span class="n">h</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span><span class="k">$(</span>CFLAGS<span class="k">)</span><span class="w"> </span>-c<span class="w"> </span>main.c
+
+<span class="nf">math.o</span><span class="o">:</span><span class="w"> </span><span class="n">math</span>.<span class="n">c</span> <span class="n">math</span>.<span class="n">h</span>
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span><span class="k">$(</span>CFLAGS<span class="k">)</span><span class="w"> </span>-c<span class="w"> </span>math.c
+
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">    </span>rm<span class="w"> </span>-f<span class="w"> </span><span class="k">$(</span>OBJECTS<span class="k">)</span><span class="w"> </span><span class="k">$(</span>TARGET<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="cmake-example">CMake Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c"># CMakeLists.txt</span>
+<span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.10</span><span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span><span class="s">MathProgram</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_C_STANDARD</span><span class="w"> </span><span class="s">99</span><span class="p">)</span>
+
+<span class="nb">add_library</span><span class="p">(</span><span class="s">math</span><span class="w"> </span><span class="s">math.c</span><span class="p">)</span>
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">program</span><span class="w"> </span><span class="s">main.c</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">program</span><span class="w"> </span><span class="s">math</span><span class="p">)</span>
+<span class="nb">target_include_directories</span><span class="p">(</span><span class="s">program</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">.</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="debugging-information">Debugging Information</h2>
+<h3 id="debug-symbols">Debug Symbols</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile with debug information</span>
+gcc<span class="w"> </span>-g<span class="w"> </span>-O0<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_debug
+
+<span class="c1"># Strip debug information</span>
+strip<span class="w"> </span>main_debug<span class="w"> </span>-o<span class="w"> </span>main_stripped
+
+<span class="c1"># Compare file sizes</span>
+ls<span class="w"> </span>-la<span class="w"> </span>main_debug<span class="w"> </span>main_stripped
+
+<span class="c1"># View debug sections</span>
+objdump<span class="w"> </span>-g<span class="w"> </span>main_debug<span class="w">    </span><span class="c1"># Debug sections</span>
+readelf<span class="w"> </span>-w<span class="w"> </span>main_debug<span class="w">    </span><span class="c1"># DWARF debug info</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="different-debug-formats">Different Debug Formats</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># DWARF format (default on Linux)</span>
+gcc<span class="w"> </span>-g<span class="w"> </span>-gdwarf-4<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_dwarf
+
+<span class="c1"># Generate additional debug info</span>
+gcc<span class="w"> </span>-g3<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_debug3<span class="w">    </span><span class="c1"># Include macro definitions</span>
+
+<span class="c1"># Split debug info</span>
+objcopy<span class="w"> </span>--only-keep-debug<span class="w"> </span>main_debug<span class="w"> </span>main.debug
+objcopy<span class="w"> </span>--strip-debug<span class="w"> </span>main_debug
+objcopy<span class="w"> </span>--add-gnu-debuglink<span class="o">=</span>main.debug<span class="w"> </span>main_debug
+</code></pre></div></td></tr></table></div>
+<h2 id="cross-compilation">Cross-Compilation</h2>
+<h3 id="targeting-different-architectures">Targeting Different Architectures</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># 32-bit on 64-bit system</span>
+gcc<span class="w"> </span>-m32<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_32bit
+
+<span class="c1"># Different target architecture (requires cross-compiler)</span>
+arm-linux-gnueabihf-gcc<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_arm
+</code></pre></div></td></tr></table></div>
+<h2 id="common-gcc-options">Common GCC Options</h2>
+<h3 id="output-control">Output Control</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Specify output file</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>program<span class="w">              </span><span class="c1"># Custom executable name</span>
+gcc<span class="w"> </span>-c<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.o<span class="w">           </span><span class="c1"># Object file output</span>
+gcc<span class="w"> </span>-S<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.s<span class="w">           </span><span class="c1"># Assembly output</span>
+gcc<span class="w"> </span>-E<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main.i<span class="w">           </span><span class="c1"># Preprocessed output</span>
+
+<span class="c1"># Multiple files</span>
+gcc<span class="w"> </span>file1.c<span class="w"> </span>file2.c<span class="w"> </span>-o<span class="w"> </span>program<span class="w">    </span><span class="c1"># Compile and link multiple files</span>
+gcc<span class="w"> </span>*.c<span class="w"> </span>-o<span class="w"> </span>program<span class="w">                </span><span class="c1"># Compile all C files in directory</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="preprocessing-options">Preprocessing Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Define macros</span>
+gcc<span class="w"> </span>-DDEBUG<span class="w"> </span>main.c<span class="w">                </span><span class="c1"># Define DEBUG macro</span>
+gcc<span class="w"> </span>-DMAX_SIZE<span class="o">=</span><span class="m">200</span><span class="w"> </span>main.c<span class="w">         </span><span class="c1"># Define macro with value</span>
+gcc<span class="w"> </span>-DDEBUG<span class="o">=</span><span class="m">1</span><span class="w"> </span>-DVERSION<span class="o">=</span><span class="se">\&quot;</span><span class="m">1</span>.0<span class="se">\&quot;</span><span class="w"> </span>main.c<span class="w">  </span><span class="c1"># Multiple definitions</span>
+
+<span class="c1"># Include directories</span>
+gcc<span class="w"> </span>-I/usr/local/include<span class="w"> </span>main.c<span class="w">   </span><span class="c1"># Add include directory</span>
+gcc<span class="w"> </span>-I.<span class="w"> </span>-I../include<span class="w"> </span>main.c<span class="w">       </span><span class="c1"># Multiple include paths</span>
+
+<span class="c1"># Preprocessor only</span>
+gcc<span class="w"> </span>-E<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Show preprocessed output</span>
+gcc<span class="w"> </span>-M<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Generate dependency information</span>
+gcc<span class="w"> </span>-MM<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Dependencies without system headers</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="library-and-linking-options">Library and Linking Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Link with libraries</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-lm<span class="w">                    </span><span class="c1"># Link with math library</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-lpthread<span class="w">             </span><span class="c1"># Link with pthread library</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-lssl<span class="w"> </span>-lcrypto<span class="w">         </span><span class="c1"># Multiple libraries</span>
+
+<span class="c1"># Library search paths</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-L/usr/local/lib<span class="w"> </span>-lmylib<span class="w">   </span><span class="c1"># Add library search directory</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-L.<span class="w"> </span>-lmath<span class="w">                 </span><span class="c1"># Use current directory</span>
+
+<span class="c1"># Static vs dynamic linking</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-static<span class="w">                </span><span class="c1"># Force static linking</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-shared<span class="w">                </span><span class="c1"># Create shared library</span>
+gcc<span class="w"> </span>-fPIC<span class="w"> </span>-shared<span class="w"> </span>lib.c<span class="w"> </span>-o<span class="w"> </span>lib.so<span class="w"> </span><span class="c1"># Position Independent Code for shared lib</span>
+
+<span class="c1"># Runtime library path</span>
+gcc<span class="w"> </span>main.c<span class="w"> </span>-Wl,-rpath,/opt/lib<span class="w">    </span><span class="c1"># Set runtime library search path</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="debug-and-profiling-options">Debug and Profiling Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Debug information</span>
+gcc<span class="w"> </span>-g<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Include debug symbols</span>
+gcc<span class="w"> </span>-g3<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Maximum debug info (includes macros)</span>
+gcc<span class="w"> </span>-ggdb<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># GDB-specific debug format</span>
+gcc<span class="w"> </span>-gdwarf-4<span class="w"> </span>main.c<span class="w">              </span><span class="c1"># Specific DWARF version</span>
+
+<span class="c1"># Profiling</span>
+gcc<span class="w"> </span>-pg<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Enable profiling with gprof</span>
+gcc<span class="w"> </span>-fprofile-arcs<span class="w"> </span>-ftest-coverage<span class="w"> </span>main.c<span class="w">  </span><span class="c1"># Code coverage analysis</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="warning-and-error-options">Warning and Error Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Basic warnings</span>
+gcc<span class="w"> </span>-Wall<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># Enable common warnings</span>
+gcc<span class="w"> </span>-Wextra<span class="w"> </span>main.c<span class="w">                </span><span class="c1"># Extra warnings</span>
+gcc<span class="w"> </span>-Werror<span class="w"> </span>main.c<span class="w">                </span><span class="c1"># Treat warnings as errors</span>
+gcc<span class="w"> </span>-w<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Suppress all warnings</span>
+
+<span class="c1"># Specific warnings</span>
+gcc<span class="w"> </span>-Wunused<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># Warn about unused variables</span>
+gcc<span class="w"> </span>-Wformat<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># Check printf/scanf format strings</span>
+gcc<span class="w"> </span>-Wconversion<span class="w"> </span>main.c<span class="w">           </span><span class="c1"># Warn about type conversions</span>
+gcc<span class="w"> </span>-Wshadow<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># Warn about variable shadowing</span>
+gcc<span class="w"> </span>-Wstrict-prototypes<span class="w"> </span>main.c<span class="w">    </span><span class="c1"># Require function prototypes</span>
+
+<span class="c1"># Error control</span>
+gcc<span class="w"> </span>-Wfatal-errors<span class="w"> </span>main.c<span class="w">         </span><span class="c1"># Stop after first error</span>
+gcc<span class="w"> </span>-fmax-errors<span class="o">=</span><span class="m">5</span><span class="w"> </span>main.c<span class="w">         </span><span class="c1"># Limit number of errors reported</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="optimization-options">Optimization Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Optimization levels</span>
+gcc<span class="w"> </span>-O0<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># No optimization (default)</span>
+gcc<span class="w"> </span>-O1<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Basic optimization</span>
+gcc<span class="w"> </span>-O2<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Standard optimization</span>
+gcc<span class="w"> </span>-O3<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Aggressive optimization</span>
+gcc<span class="w"> </span>-Os<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Optimize for size</span>
+gcc<span class="w"> </span>-Ofast<span class="w"> </span>main.c<span class="w">                 </span><span class="c1"># Fastest optimization (may break standards)</span>
+
+<span class="c1"># Specific optimizations</span>
+gcc<span class="w"> </span>-O2<span class="w"> </span>-funroll-loops<span class="w"> </span>main.c<span class="w">     </span><span class="c1"># Unroll loops</span>
+gcc<span class="w"> </span>-O2<span class="w"> </span>-finline-functions<span class="w"> </span>main.c<span class="w"> </span><span class="c1"># Inline functions aggressively</span>
+gcc<span class="w"> </span>-O2<span class="w"> </span>-fomit-frame-pointer<span class="w"> </span>main.c<span class="w"> </span><span class="c1"># Omit frame pointer</span>
+gcc<span class="w"> </span>-O2<span class="w"> </span>-ffast-math<span class="w"> </span>main.c<span class="w">        </span><span class="c1"># Fast floating-point math</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="architecture-and-platform-options">Architecture and Platform Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Target architecture</span>
+gcc<span class="w"> </span>-m32<span class="w"> </span>main.c<span class="w">                   </span><span class="c1"># 32-bit target</span>
+gcc<span class="w"> </span>-m64<span class="w"> </span>main.c<span class="w">                   </span><span class="c1"># 64-bit target</span>
+gcc<span class="w"> </span>-march<span class="o">=</span>native<span class="w"> </span>main.c<span class="w">          </span><span class="c1"># Optimize for current CPU</span>
+gcc<span class="w"> </span>-march<span class="o">=</span>core2<span class="w"> </span>main.c<span class="w">           </span><span class="c1"># Target specific CPU architecture</span>
+gcc<span class="w"> </span>-mtune<span class="o">=</span>generic<span class="w"> </span>main.c<span class="w">         </span><span class="c1"># Tune for generic CPU</span>
+
+<span class="c1"># Platform-specific</span>
+gcc<span class="w"> </span>-msse4<span class="w"> </span>main.c<span class="w">                 </span><span class="c1"># Enable SSE4 instructions</span>
+gcc<span class="w"> </span>-mavx<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># Enable AVX instructions</span>
+gcc<span class="w"> </span>-mfpmath<span class="o">=</span>sse<span class="w"> </span>main.c<span class="w">           </span><span class="c1"># Use SSE for floating-point math</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="security-and-hardening-options">Security and Hardening Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Stack protection</span>
+gcc<span class="w"> </span>-fstack-protector<span class="w"> </span>main.c<span class="w">      </span><span class="c1"># Basic stack protection</span>
+gcc<span class="w"> </span>-fstack-protector-all<span class="w"> </span>main.c<span class="w">  </span><span class="c1"># Protect all functions</span>
+gcc<span class="w"> </span>-fstack-protector-strong<span class="w"> </span>main.c<span class="w"> </span><span class="c1"># Strong stack protection</span>
+
+<span class="c1"># Position independence</span>
+gcc<span class="w"> </span>-fPIC<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># Position Independent Code</span>
+gcc<span class="w"> </span>-fPIE<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># Position Independent Executable</span>
+gcc<span class="w"> </span>-pie<span class="w"> </span>main.c<span class="w">                   </span><span class="c1"># Create PIE executable</span>
+
+<span class="c1"># Buffer overflow protection</span>
+gcc<span class="w"> </span>-D_FORTIFY_SOURCE<span class="o">=</span><span class="m">1</span><span class="w"> </span>main.c<span class="w">    </span><span class="c1"># Basic buffer overflow detection</span>
+gcc<span class="w"> </span>-D_FORTIFY_SOURCE<span class="o">=</span><span class="m">2</span><span class="w"> </span>main.c<span class="w">    </span><span class="c1"># Enhanced buffer overflow detection</span>
+
+<span class="c1"># Other security features</span>
+gcc<span class="w"> </span>-Wl,-z,relro<span class="w"> </span>main.c<span class="w">           </span><span class="c1"># Read-only relocations</span>
+gcc<span class="w"> </span>-Wl,-z,now<span class="w"> </span>main.c<span class="w">             </span><span class="c1"># Immediate binding</span>
+gcc<span class="w"> </span>-Wl,-z,noexecstack<span class="w"> </span>main.c<span class="w">     </span><span class="c1"># Non-executable stack</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="language-standard-options">Language Standard Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># C standards</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c89<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># ANSI C (C89/C90)</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># C99 standard</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c11<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># C11 standard</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c17<span class="w"> </span>main.c<span class="w">               </span><span class="c1"># C17 standard</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>gnu99<span class="w"> </span>main.c<span class="w">             </span><span class="c1"># GNU C99 (with extensions)</span>
+
+<span class="c1"># Strict compliance</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>-pedantic<span class="w"> </span>main.c<span class="w">     </span><span class="c1"># Strict standard compliance</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>-pedantic-errors<span class="w"> </span>main.c<span class="w"> </span><span class="c1"># Pedantic warnings as errors</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="debugging-and-analysis-options">Debugging and Analysis Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Sanitizers (runtime error detection)</span>
+gcc<span class="w"> </span>-fsanitize<span class="o">=</span>address<span class="w"> </span>main.c<span class="w">     </span><span class="c1"># Address sanitizer (memory errors)</span>
+gcc<span class="w"> </span>-fsanitize<span class="o">=</span>thread<span class="w"> </span>main.c<span class="w">      </span><span class="c1"># Thread sanitizer (race conditions)</span>
+gcc<span class="w"> </span>-fsanitize<span class="o">=</span>undefined<span class="w"> </span>main.c<span class="w">   </span><span class="c1"># Undefined behavior sanitizer</span>
+gcc<span class="w"> </span>-fsanitize<span class="o">=</span>leak<span class="w"> </span>main.c<span class="w">        </span><span class="c1"># Memory leak detector</span>
+
+<span class="c1"># Static analysis</span>
+gcc<span class="w"> </span>-fanalyzer<span class="w"> </span>main.c<span class="w">             </span><span class="c1"># Enable static analyzer (GCC 10+)</span>
+
+<span class="c1"># Verbose output</span>
+gcc<span class="w"> </span>-v<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Verbose compilation output</span>
+gcc<span class="w"> </span>-Q<span class="w"> </span>--help<span class="o">=</span>target<span class="w">              </span><span class="c1"># Show target-specific options</span>
+gcc<span class="w"> </span>-dumpspecs<span class="w">                    </span><span class="c1"># Show built-in specs</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="miscellaneous-options">Miscellaneous Options</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Preprocessing control</span>
+gcc<span class="w"> </span>-C<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Keep comments in preprocessed output</span>
+gcc<span class="w"> </span>-P<span class="w"> </span>main.c<span class="w">                     </span><span class="c1"># Don&#39;t generate line markers</span>
+gcc<span class="w"> </span>-traditional<span class="w"> </span>main.c<span class="w">           </span><span class="c1"># Traditional C preprocessing</span>
+
+<span class="c1"># Dependency generation</span>
+gcc<span class="w"> </span>-MD<span class="w"> </span>main.c<span class="w">                    </span><span class="c1"># Generate dependency file</span>
+gcc<span class="w"> </span>-MMD<span class="w"> </span>main.c<span class="w">                   </span><span class="c1"># Dependencies excluding system headers</span>
+gcc<span class="w"> </span>-MF<span class="w"> </span>deps.d<span class="w"> </span>main.c<span class="w">             </span><span class="c1"># Specify dependency output file</span>
+
+<span class="c1"># Temporary files</span>
+gcc<span class="w"> </span>-save-temps<span class="w"> </span>main.c<span class="w">            </span><span class="c1"># Keep intermediate files</span>
+gcc<span class="w"> </span>-pipe<span class="w"> </span>main.c<span class="w">                  </span><span class="c1"># Use pipes instead of temporary files</span>
+
+<span class="c1"># Multiple jobs</span>
+make<span class="w"> </span>-j4<span class="w">                          </span><span class="c1"># Use 4 parallel jobs (for makefiles)</span>
+gcc<span class="w"> </span>-j4<span class="w"> </span>*.c<span class="w">                       </span><span class="c1"># Parallel compilation (newer GCC versions)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="practical-examples">Practical Examples</h3>
+<p><strong>Development Build:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>gcc<span class="w"> </span>-g<span class="w"> </span>-O0<span class="w"> </span>-Wall<span class="w"> </span>-Wextra<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>-DDEBUG<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_debug
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Release Build:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>gcc<span class="w"> </span>-O2<span class="w"> </span>-DNDEBUG<span class="w"> </span>-s<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_release
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Security-Hardened Build:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>gcc<span class="w"> </span>-O2<span class="w"> </span>-D_FORTIFY_SOURCE<span class="o">=</span><span class="m">2</span><span class="w"> </span>-fstack-protector-strong<span class="w"> </span>-fPIE<span class="w"> </span>-pie<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-Wl,-z,relro,-z,now<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_secure
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Analysis Build:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>gcc<span class="w"> </span>-g<span class="w"> </span>-O1<span class="w"> </span>-fsanitize<span class="o">=</span>address<span class="w"> </span>-fsanitize<span class="o">=</span>undefined<span class="w"> </span>-fanalyzer<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-Wall<span class="w"> </span>-Wextra<span class="w"> </span>main.c<span class="w"> </span>-o<span class="w"> </span>main_analysis
+</code></pre></div></td></tr></table></div></p>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Understanding Compilation</p>
+<ul>
+<li><strong>Preprocessing</strong> expands macros and includes files</li>
+<li><strong>Compilation</strong> translates C to assembly language</li>
+<li><strong>Assembly</strong> converts assembly to machine code</li>
+<li><strong>Linking</strong> combines object files and resolves symbols</li>
+<li><strong>Optimization</strong> can dramatically change code structure</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Reverse Engineering Insights</p>
+<ul>
+<li>Higher optimization makes code harder to reverse</li>
+<li>Debug symbols provide valuable information</li>
+<li>Static linking includes more code in the binary</li>
+<li>Understanding compilation helps interpret disassembly</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../03-assembly/">Assembly Basics</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

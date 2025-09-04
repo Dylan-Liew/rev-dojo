@@ -1,0 +1,2204 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/static/03-strings-symbols/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>String & Symbol Analysis - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#string-symbol-analysis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              String &amp; Symbol Analysis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#string-analysis-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Analysis Fundamentals
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="String Analysis Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-strings-in-binaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Strings in Binaries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-storage-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Storage Locations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finding-strings-with-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finding Strings with Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Finding Strings with Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-strings-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using strings Command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#string-analysis-in-disassemblers" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Analysis in Disassemblers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="String Analysis in Disassemblers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#symbol-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symbol Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Symbol Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-symbol-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Symbol Tables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#symbol-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symbol Types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elf-symbol-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      ELF Symbol Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objdump-symbol-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Objdump Symbol Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-string-analysis-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced String Analysis Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced String Analysis Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-encryption-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Encryption Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-decryption-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Decryption Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#string-based-vulnerability-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      String-based Vulnerability Discovery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="String-based Vulnerability Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#format-string-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Format String Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#buffer-overflow-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Buffer Overflow String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-string-analysis-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical String Analysis Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical String Analysis Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#malware-string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Malware String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#license-and-copyright-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      License and Copyright Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automation-and-scripting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automation and Scripting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automation and Scripting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-string-analysis-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated String Analysis Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="string-symbol-analysis">String &amp; Symbol Analysis</h1>
+<p>String and symbol analysis are fundamental techniques in reverse engineering that provide crucial insights into program functionality, user interfaces, error messages, and internal structure.</p>
+<h2 id="string-analysis-fundamentals">String Analysis Fundamentals</h2>
+<h3 id="types-of-strings-in-binaries">Types of Strings in Binaries</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// String examples in C</span>
+<span class="kt">char</span><span class="w"> </span><span class="n">global_string</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Global string in .data&quot;</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">const_string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Constant string in .rodata&quot;</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">static_string</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Static string&quot;</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">local_string</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Local string on stack&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">dynamic_string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="mi">50</span><span class="p">);</span>
+<span class="w">    </span><span class="n">strcpy</span><span class="p">(</span><span class="n">dynamic_string</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Dynamic string on heap&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="string-storage-locations">String Storage Locations</h3>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Description</th>
+<th>Characteristics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.rodata</td>
+<td>Read-only data</td>
+<td>Constant strings, immutable</td>
+</tr>
+<tr>
+<td>.data</td>
+<td>Initialized data</td>
+<td>Global/static strings, writable</td>
+</tr>
+<tr>
+<td>.bss</td>
+<td>Uninitialized data</td>
+<td>Buffers for runtime strings</td>
+</tr>
+<tr>
+<td>Stack</td>
+<td>Local variables</td>
+<td>Temporary strings</td>
+</tr>
+<tr>
+<td>Heap</td>
+<td>Dynamic allocation</td>
+<td>Runtime-created strings</td>
+</tr>
+</tbody>
+</table>
+<h2 id="finding-strings-with-tools">Finding Strings with Tools</h2>
+<h3 id="using-strings-command">Using <code>strings</code> Command</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Basic string extraction</span>
+strings<span class="w"> </span>binary_file
+
+<span class="c1"># Minimum length filter</span>
+strings<span class="w"> </span>-n<span class="w"> </span><span class="m">10</span><span class="w"> </span>binary_file
+
+<span class="c1"># Show offset addresses</span>
+strings<span class="w"> </span>-o<span class="w"> </span>binary_file
+
+<span class="c1"># Different encodings</span>
+strings<span class="w"> </span>-e<span class="w"> </span>l<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># 16-bit little endian</span>
+strings<span class="w"> </span>-e<span class="w"> </span>b<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># 16-bit big endian</span>
+strings<span class="w"> </span>-e<span class="w"> </span>L<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># 32-bit little endian</span>
+
+<span class="c1"># Target specific sections</span>
+strings<span class="w"> </span>-t<span class="w"> </span>x<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># Show hex offsets</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="advanced-string-analysis">Advanced String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Find strings with context</span>
+strings<span class="w"> </span>-a<span class="w"> </span>-t<span class="w"> </span>x<span class="w"> </span>binary_file<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;password\|secret\|key&quot;</span>
+
+<span class="c1"># Extract from specific file sections</span>
+objdump<span class="w"> </span>-s<span class="w"> </span>-j<span class="w"> </span>.rodata<span class="w"> </span>binary_file<span class="w"> </span><span class="p">|</span><span class="w"> </span>strings
+
+<span class="c1"># Unicode string detection</span>
+strings<span class="w"> </span>-e<span class="w"> </span>l<span class="w"> </span>binary_file<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;^.</span>$<span class="s2">&quot;</span>
+
+<span class="c1"># Find embedded URLs and paths</span>
+strings<span class="w"> </span>binary_file<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;(http|ftp|file)://|[A-Za-z]:\\\\&quot;</span>
+
+<span class="c1"># Database connection strings</span>
+strings<span class="w"> </span>binary_file<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;server\|database\|connection&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="string-analysis-in-disassemblers">String Analysis in Disassemblers</h2>
+<h3 id="ida-pro-string-analysis">IDA Pro String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code>Strings Window (Shift+F12):
+- View all strings in binary
+- Filter by type and encoding
+- Show cross-references
+- Navigate to string usage
+
+String Search:
+- Alt+T: Search for specific strings
+- Use wildcards: &quot;pass*&quot; finds &quot;password&quot;, &quot;passwd&quot;
+- Regular expressions supported
+
+Cross-Reference Analysis:
+- Double-click string to see usage
+- Ctrl+X on string for all references
+</code></pre></div></td></tr></table></div>
+<p><strong>IDA Pro String Analysis Workflow:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code>1. Open Strings window (Shift+F12)
+2. Filter strings of interest
+3. Double-click to navigate to usage
+4. Analyze context around string references
+5. Rename functions based on string content
+6. Document findings with comments
+</code></pre></div></td></tr></table></div></p>
+<h3 id="ghidra-string-analysis">Ghidra String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code>String Analysis in Ghidra:
+1. Search → For Strings
+2. Configure search parameters:
+   - Minimum string length
+   - Character encoding
+   - Search memory blocks
+3. Review results in table
+4. Navigate to references
+</code></pre></div></td></tr></table></div>
+<p><strong>Ghidra String Search Script:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// FindCryptoStrings.java</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.app.script.GhidraScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.listing.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.mem.*</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">FindCryptoStrings</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">GhidraScript</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">cryptoKeywords</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="s">&quot;AES&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;DES&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;RSA&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SHA&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;MD5&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;encrypt&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;decrypt&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cipher&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hash&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;secret&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;private&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;public&quot;</span>
+<span class="w">        </span><span class="p">};</span>
+
+<span class="w">        </span><span class="n">MemoryBlock</span><span class="o">[]</span><span class="w"> </span><span class="n">blocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentProgram</span><span class="p">.</span><span class="na">getMemory</span><span class="p">().</span><span class="na">getBlocks</span><span class="p">();</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">MemoryBlock</span><span class="w"> </span><span class="n">block</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">blocks</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">block</span><span class="p">.</span><span class="na">isInitialized</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">findStringsInBlock</span><span class="p">(</span><span class="n">block</span><span class="p">,</span><span class="w"> </span><span class="n">cryptoKeywords</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">findStringsInBlock</span><span class="p">(</span><span class="n">MemoryBlock</span><span class="w"> </span><span class="n">block</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">keywords</span><span class="p">)</span><span class="w"> </span>
+<span class="w">            </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Implementation to search for strings</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Searching block: %s\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">block</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+<span class="w">        </span><span class="c1">// Search logic here</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<h2 id="symbol-analysis">Symbol Analysis</h2>
+<h3 id="understanding-symbol-tables">Understanding Symbol Tables</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># View symbol table</span>
+nm<span class="w"> </span>binary_file
+
+<span class="c1"># Show all symbols (including debug)</span>
+nm<span class="w"> </span>-a<span class="w"> </span>binary_file
+
+<span class="c1"># Show dynamic symbols</span>
+nm<span class="w"> </span>-D<span class="w"> </span>binary_file
+
+<span class="c1"># Demangle C++ symbols</span>
+nm<span class="w"> </span>-C<span class="w"> </span>binary_file
+
+<span class="c1"># Show symbol types</span>
+nm<span class="w"> </span>-t<span class="w"> </span>x<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># Hex addresses</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="symbol-types">Symbol Types</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code>Symbol Types in nm output:
+T/t - Text section (code)
+D/d - Data section (initialized data)
+B/b - BSS section (uninitialized data)
+R/r - Read-only data
+U - Undefined (external references)
+W/w - Weak symbols
+</code></pre></div></td></tr></table></div>
+<h3 id="elf-symbol-analysis">ELF Symbol Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Detailed ELF symbol information</span>
+readelf<span class="w"> </span>-s<span class="w"> </span>binary_file
+
+<span class="c1"># Symbol version information</span>
+readelf<span class="w"> </span>-V<span class="w"> </span>binary_file
+
+<span class="c1"># Dynamic symbol table</span>
+readelf<span class="w"> </span>--dyn-syms<span class="w"> </span>binary_file
+
+<span class="c1"># Section headers</span>
+readelf<span class="w"> </span>-S<span class="w"> </span>binary_file
+</code></pre></div></td></tr></table></div>
+<h3 id="objdump-symbol-analysis">Objdump Symbol Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Disassemble with symbols</span>
+objdump<span class="w"> </span>-d<span class="w"> </span>-t<span class="w"> </span>binary_file
+
+<span class="c1"># Show all headers and symbols</span>
+objdump<span class="w"> </span>-x<span class="w"> </span>binary_file
+
+<span class="c1"># Symbol table</span>
+objdump<span class="w"> </span>-T<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># Dynamic symbols</span>
+objdump<span class="w"> </span>-t<span class="w"> </span>binary_file<span class="w">    </span><span class="c1"># Regular symbols</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="advanced-string-analysis-techniques">Advanced String Analysis Techniques</h2>
+<h3 id="string-encryption-detection">String Encryption Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">string</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_string_entropy</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate entropy to detect encrypted strings&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Count character frequencies</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="c1"># Calculate entropy</span>
+    <span class="n">entropy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counter</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="n">count</span> <span class="o">/</span> <span class="n">length</span>
+        <span class="n">entropy</span> <span class="o">-=</span> <span class="n">probability</span> <span class="o">*</span> <span class="p">(</span><span class="n">probability</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">entropy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_obfuscated_strings</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find potentially obfuscated strings&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+    <span class="c1"># Get all strings</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span> 
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">strings_list</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">suspicious_strings</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">:</span>  <span class="c1"># Skip short strings</span>
+            <span class="k">continue</span>
+
+        <span class="n">entropy</span> <span class="o">=</span> <span class="n">analyze_string_entropy</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="c1"># High entropy might indicate encryption</span>
+        <span class="k">if</span> <span class="n">entropy</span> <span class="o">&gt;</span> <span class="mf">4.5</span><span class="p">:</span>
+            <span class="n">suspicious_strings</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">entropy</span><span class="p">))</span>
+
+        <span class="c1"># Look for base64-like patterns</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[A-Za-z0-9+/]+=*$&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">suspicious_strings</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;Base64-like&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Hex-encoded strings</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[0-9A-Fa-f]+$&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">suspicious_strings</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;Hex-encoded&quot;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">suspicious_strings</span>
+
+<span class="c1"># Usage</span>
+<span class="n">suspicious</span> <span class="o">=</span> <span class="n">detect_obfuscated_strings</span><span class="p">(</span><span class="s1">&#39;./malware_sample&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">string</span><span class="p">,</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">suspicious</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Suspicious: </span><span class="si">{</span><span class="n">string</span><span class="p">[:</span><span class="mi">50</span><span class="p">]</span><span class="si">}</span><span class="s2">... (</span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="string-decryption-analysis">String Decryption Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_xor_strings</span><span class="p">(</span><span class="n">binary_data</span><span class="p">,</span> <span class="n">key_length</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to find XOR-encrypted strings&quot;&quot;&quot;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">20</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">256</span><span class="p">):</span>
+            <span class="n">decrypted</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)):</span>
+                <span class="n">char</span> <span class="o">=</span> <span class="n">binary_data</span><span class="p">[</span><span class="n">offset</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">^</span> <span class="n">key</span>
+
+                <span class="c1"># Check if result is printable ASCII</span>
+                <span class="k">if</span> <span class="mi">32</span> <span class="o">&lt;=</span> <span class="n">char</span> <span class="o">&lt;=</span> <span class="mi">126</span><span class="p">:</span>
+                    <span class="n">decrypted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">char</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Null terminator</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">valid</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="nb">hex</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+                    <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="nb">hex</span><span class="p">(</span><span class="n">key</span><span class="p">),</span>
+                    <span class="s1">&#39;string&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">decrypted</span><span class="p">)</span>
+                <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_string_references</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">target_string</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find code references to specific strings&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+    <span class="c1"># Find string offset</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span> 
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">string_offset</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">target_string</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">string_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">string_offset</span><span class="p">:</span>
+        <span class="c1"># Search for references to this offset in disassembly</span>
+        <span class="n">disasm_result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;objdump&#39;</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                                     <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">disasm_result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hex</span><span class="p">(</span><span class="n">string_offset</span><span class="p">)</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">references</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">references</span>
+
+    <span class="k">return</span> <span class="p">[]</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="dynamic-string-analysis">Dynamic String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pwn</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">trace_string_operations</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace string operations during execution&quot;&quot;&quot;</span>
+
+    <span class="c1"># GDB script to trace string functions</span>
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    break strcpy</span>
+<span class="s1">    break strcat</span>
+<span class="s1">    break sprintf</span>
+<span class="s1">    break malloc</span>
+
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;String operation at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rip</span>
+<span class="s1">        printf &quot;Arg1: </span><span class="si">%s</span><span class="se">\\</span><span class="s1">n&quot;, $rdi</span>
+<span class="s1">        if ($rsi != 0)</span>
+<span class="s1">            printf &quot;Arg2: </span><span class="si">%s</span><span class="se">\\</span><span class="s1">n&quot;, $rsi</span>
+<span class="s1">        end</span>
+<span class="s1">        backtrace 3</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    run</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">,</span> <span class="n">gdb_script</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">monitor_heap_strings</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor heap allocations for string patterns&quot;&quot;&quot;</span>
+
+    <span class="c1"># Hook malloc/free to track string allocations</span>
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $alloc_size = $rdi</span>
+<span class="s1">        printf &quot;malloc(</span><span class="si">%d</span><span class="s1">) = &quot;, $alloc_size</span>
+<span class="s1">        finish</span>
+<span class="s1">        printf &quot;%p</span><span class="se">\\</span><span class="s1">n&quot;, $rax</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break strcpy</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;strcpy(%p, </span><span class="se">\\</span><span class="s1">&quot;</span><span class="si">%s</span><span class="se">\\</span><span class="s1">&quot;)</span><span class="se">\\</span><span class="s1">n&quot;, $rdi, $rsi</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="string-based-vulnerability-discovery">String-based Vulnerability Discovery</h2>
+<h3 id="format-string-detection">Format String Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_format_string_vulns</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find potential format string vulnerabilities&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+    <span class="c1"># Disassemble binary</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;objdump&#39;</span><span class="p">,</span> <span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">dangerous_patterns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s1">&#39;call.*printf&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;call.*sprintf&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;call.*fprintf&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;call.*snprintf&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">vulnerabilities</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">dangerous_patterns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+                <span class="c1"># Check if format string comes from user input</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">5</span><span class="p">):</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">vulnerabilities</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;line&#39;</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                    <span class="s1">&#39;context&#39;</span><span class="p">:</span> <span class="n">context</span><span class="p">,</span>
+                    <span class="s1">&#39;risk&#39;</span><span class="p">:</span> <span class="n">analyze_format_risk</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+                <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">vulnerabilities</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_format_risk</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze if format string might be user-controlled&quot;&quot;&quot;</span>
+    <span class="n">user_input_indicators</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;gets&#39;</span><span class="p">,</span> <span class="s1">&#39;scanf&#39;</span><span class="p">,</span> <span class="s1">&#39;fgets&#39;</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;argv&#39;</span><span class="p">,</span> <span class="s1">&#39;environ&#39;</span><span class="p">,</span> <span class="s1">&#39;getenv&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">context_text</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">indicator</span> <span class="ow">in</span> <span class="n">user_input_indicators</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">indicator</span> <span class="ow">in</span> <span class="n">context_text</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;HIGH&quot;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;MEDIUM&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="buffer-overflow-string-analysis">Buffer Overflow String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_dangerous_string_functions</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find usage of dangerous string functions&quot;&quot;&quot;</span>
+
+    <span class="n">dangerous_functions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;strcpy&#39;</span><span class="p">:</span> <span class="s1">&#39;Use strncpy instead&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;strcat&#39;</span><span class="p">:</span> <span class="s1">&#39;Use strncat instead&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;sprintf&#39;</span><span class="p">:</span> <span class="s1">&#39;Use snprintf instead&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;gets&#39;</span><span class="p">:</span> <span class="s1">&#39;Use fgets instead&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;scanf&#39;</span><span class="p">:</span> <span class="s1">&#39;Specify field width&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;vsprintf&#39;</span><span class="p">:</span> <span class="s1">&#39;Use vsnprintf instead&#39;</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Search in symbols and PLT</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_binary</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;nm&#39;</span><span class="p">,</span> <span class="s1">&#39;-D&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                              <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">found_functions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">suggestion</span> <span class="ow">in</span> <span class="n">dangerous_functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="s1">&#39;U &#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># Undefined symbol (imported)</span>
+                    <span class="n">found_functions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">func</span><span class="p">,</span> <span class="n">suggestion</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">found_functions</span>
+
+    <span class="k">return</span> <span class="n">check_binary</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_string_boundaries</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze string buffer boundaries&quot;&quot;&quot;</span>
+
+    <span class="c1"># Look for buffer allocations followed by string operations</span>
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $malloc_size = $rdi</span>
+<span class="s1">        set $malloc_addr = 0</span>
+<span class="s1">        finish</span>
+<span class="s1">        set $malloc_addr = $rax</span>
+<span class="s1">        printf &quot;Allocated </span><span class="si">%d</span><span class="s1"> bytes at %p</span><span class="se">\\</span><span class="s1">n&quot;, $malloc_size, $malloc_addr</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break strcpy</span>
+<span class="s1">    commands</span>
+<span class="s1">        if ($rdi == $malloc_addr)</span>
+<span class="s1">            printf &quot;strcpy to recently allocated buffer</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">            printf &quot;Buffer size: </span><span class="si">%d</span><span class="s1">, String: </span><span class="si">%s</span><span class="se">\\</span><span class="s1">n&quot;, $malloc_size, $rsi</span>
+<span class="s1">            set $str_len = strlen($rsi)</span>
+<span class="s1">            if ($str_len &gt;= $malloc_size)</span>
+<span class="s1">                printf &quot;POTENTIAL OVERFLOW!</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">            end</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="practical-string-analysis-examples">Practical String Analysis Examples</h2>
+<h3 id="malware-string-analysis">Malware String Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_malware_strings</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze strings for malware indicators&quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+    <span class="c1"># Get all strings</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">strings_list</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">indicators</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;persistence&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;evasion&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;crypto&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;https?://[^\s]+&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;\d+\.\d+\.\d+\.\d+&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;[a-zA-Z0-9.-]+\.(?:com|net|org|ru|cn)&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;(?:POST|GET|HTTP)&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;User-Agent&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;persistence&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;HKEY_.*</span><span class="se">\\</span><span class="s1">.*Run&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">Windows</span><span class="se">\\</span><span class="s1">System32&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">AppData</span><span class="se">\\</span><span class="s1">Roaming&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;svchost\.exe&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;winlogon\.exe&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;evasion&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;IsDebuggerPresent&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;GetTickCount&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;VirtualProtect&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;CreateMutex&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;Sleep&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;crypto&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;(?:AES|DES|RSA)&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;CryptGenKey&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;CryptEncrypt&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;CryptDecrypt&#39;</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;\.(?:exe|dll|bat|ps1|vbs)&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;temp</span><span class="se">\\</span><span class="s1">[^</span><span class="se">\\</span><span class="s1">]+&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;\.tmp$&#39;</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">pattern_list</span> <span class="ow">in</span> <span class="n">patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">pattern_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+                    <span class="n">indicators</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">indicators</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_yara_rules_from_strings</span><span class="p">(</span><span class="n">indicators</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate YARA rules from string indicators&quot;&quot;&quot;</span>
+
+    <span class="n">yara_rule</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">rule Generated_String_Rule {</span>
+<span class="s1">    meta:</span>
+<span class="s1">        description = &quot;Generated from string analysis&quot;</span>
+<span class="s1">        author = &quot;Automated Analysis&quot;</span>
+
+<span class="s1">    strings:</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">strings</span> <span class="ow">in</span> <span class="n">indicators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>  <span class="c1"># Limit to top 5 per category</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">yara_rule</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;        $s</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1"> = &quot;</span><span class="si">{</span><span class="n">string</span><span class="si">}</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">yara_rule</span> <span class="o">+=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    condition:</span>
+<span class="s1">        any of them</span>
+<span class="s1">}</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">yara_rule</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="license-and-copyright-analysis">License and Copyright Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_licensing_info</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract licensing and copyright information&quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">licensing_patterns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s1">&#39;Copyright.*\d</span><span class="si">{4}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;©.*\d</span><span class="si">{4}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;License&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;GPL|MIT|BSD|Apache&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;All rights reserved&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;Proprietary&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;Confidential&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">licensing_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">licensing_patterns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+                <span class="n">licensing_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">licensing_info</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_version_info</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract version information&quot;&quot;&quot;</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">],</span>
+                          <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">version_patterns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s1">&#39;v?\d+\.\d+\.\d+&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;Version\s*:?\s*[\d.]+&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;Build\s*:?\s*\d+&#39;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{4}</span><span class="s1">-\d</span><span class="si">{2}</span><span class="s1">-\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># Date formats</span>
+        <span class="sa">r</span><span class="s1">&#39;Release\s*:?\s*[\w\d.]+&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">version_info</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">version_patterns</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">version_info</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;string&#39;</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+                <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">version_info</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="automation-and-scripting">Automation and Scripting</h2>
+<h3 id="automated-string-analysis-pipeline">Automated String Analysis Pipeline</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StringAnalyzer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span> <span class="o">=</span> <span class="n">binary_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_strings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysis_results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract all strings from binary&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;strings&#39;</span><span class="p">,</span> <span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="p">],</span>
+                              <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">categorize_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Categorize strings by type&quot;&quot;&quot;</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;urls&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;file_paths&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;registry_keys&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;error_messages&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;debug_strings&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;crypto_related&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;network_related&#39;</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;urls&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;https?://[^\s]+&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;file_paths&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;[A-Za-z]:</span><span class="se">\\</span><span class="s1">[^&lt;&gt;:&quot;|?*\s]+&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;registry_keys&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;HKEY_[A-Z_]+</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;error_messages&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;(?i)(error|exception|failed|invalid)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;debug_strings&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;(?i)(debug|trace|log|verbose)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;crypto_related&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;(?i)(encrypt|decrypt|hash|cipher|crypto)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;network_related&#39;</span><span class="p">:</span> <span class="sa">r</span><span class="s1">&#39;(?i)(http|tcp|udp|socket|connect)&#39;</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strings</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+                    <span class="n">categories</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">categories</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_interesting_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find potentially interesting strings&quot;&quot;&quot;</span>
+        <span class="n">interesting</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">keywords</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;secret&#39;</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;token&#39;</span><span class="p">,</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;setting&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;backdoor&#39;</span><span class="p">,</span> <span class="s1">&#39;shell&#39;</span><span class="p">,</span> <span class="s1">&#39;cmd&#39;</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strings</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">interesting</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;string&#39;</span><span class="p">:</span> <span class="n">string</span><span class="p">,</span>
+                        <span class="s1">&#39;keyword&#39;</span><span class="p">:</span> <span class="n">keyword</span><span class="p">,</span>
+                        <span class="s1">&#39;context&#39;</span><span class="p">:</span> <span class="s1">&#39;Potentially sensitive&#39;</span>
+                    <span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">interesting</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate comprehensive string analysis report&quot;&quot;&quot;</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorize_strings</span><span class="p">()</span>
+        <span class="n">interesting</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_interesting_strings</span><span class="p">()</span>
+
+        <span class="n">report</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">String Analysis Report for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="si">}</span>
+<span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="mi">50</span><span class="si">}</span>
+
+<span class="s2">Total Strings: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s2">Categories:</span>
+<span class="s2">&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">category</span><span class="p">,</span> <span class="n">strings</span> <span class="ow">in</span> <span class="n">categories</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">strings</span><span class="p">:</span>
+                <span class="n">report</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">category</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span><span class="s2"> strings</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>  <span class="c1"># Show first 3</span>
+                    <span class="n">report</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">string</span><span class="p">[:</span><span class="mi">80</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">report</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  ... and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">3</span><span class="si">}</span><span class="s2"> more</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">interesting</span><span class="p">:</span>
+            <span class="n">report</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Interesting Strings: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">interesting</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">interesting</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>  <span class="c1"># Show first 10</span>
+                <span class="n">report</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">][:</span><span class="mi">60</span><span class="p">]</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;keyword&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">return</span> <span class="n">report</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export results as JSON&quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;binary_path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="p">,</span>
+            <span class="s1">&#39;total_strings&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strings</span><span class="p">),</span>
+            <span class="s1">&#39;categories&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorize_strings</span><span class="p">(),</span>
+            <span class="s1">&#39;interesting&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_interesting_strings</span><span class="p">(),</span>
+            <span class="s1">&#39;all_strings&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">strings</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Usage</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: python string_analyzer.py &lt;binary_path&gt;&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">analyzer</span> <span class="o">=</span> <span class="n">StringAnalyzer</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">analyzer</span><span class="o">.</span><span class="n">generate_report</span><span class="p">())</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">String Analysis Fundamentals</p>
+<ul>
+<li><strong>Strings reveal functionality</strong> - Error messages, UI text, configuration</li>
+<li><strong>Multiple encodings exist</strong> - ASCII, Unicode, wide strings</li>
+<li><strong>Context matters</strong> - How and where strings are used</li>
+<li><strong>Encryption detection</strong> - High entropy strings may be encrypted</li>
+<li><strong>Cross-references</strong> - Track string usage throughout the program</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Analysis Best Practices</p>
+<ul>
+<li>Use multiple tools (strings, objdump, disassemblers)</li>
+<li>Look for patterns in string content and structure</li>
+<li>Check for obfuscation or encryption</li>
+<li>Correlate strings with symbols and functions</li>
+<li>Document findings for future reference</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Common Challenges</p>
+<ul>
+<li>Encrypted or obfuscated strings</li>
+<li>Dynamic string construction at runtime</li>
+<li>Wide character and Unicode strings</li>
+<li>Compressed or packed binaries</li>
+<li>Strings split across multiple locations</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../../dynamic/01-gdb-basics/">Dynamic Analysis - GDB Basics</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

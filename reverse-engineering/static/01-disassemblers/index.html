@@ -1,0 +1,1622 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/static/01-disassemblers/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Disassemblers: IDA Pro and Ghidra - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#disassemblers-ida-pro-and-ghidra" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Disassemblers: IDA Pro and Ghidra
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction-to-disassemblers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction to Disassemblers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction to Disassemblers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-disassemblers-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      What Disassemblers Do
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#static-vs-dynamic-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static vs Dynamic Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ida-pro-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IDA Pro Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-ida-pro-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic IDA Pro Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ghidra-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ghidra Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-ghidra-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Ghidra Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-example-analyzing-a-simple-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Example: Analyzing a Simple Binary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Example: Analyzing a Simple Binary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sample-c-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sample C Program
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IDA Pro Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loading-the-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading the Binary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-analysis-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Analysis Techniques
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ghidra Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loading-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decompiler-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decompiler View
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-analysis-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Analysis Techniques
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-analysis-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Analysis Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Analysis Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-reference-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Reference Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-flow-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scripting-and-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scripting and Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scripting and Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#idapython-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDAPython Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-script-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Script Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analysis Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Conventions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-patterns-to-recognize" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Patterns to Recognize
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Comparison
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="disassemblers-ida-pro-and-ghidra">Disassemblers: IDA Pro and Ghidra</h1>
+<p>Disassemblers are essential tools for reverse engineering, converting machine code back into human-readable assembly language. This section covers the two most popular disassemblers: IDA Pro and Ghidra.</p>
+<h2 id="introduction-to-disassemblers">Introduction to Disassemblers</h2>
+<h3 id="what-disassemblers-do">What Disassemblers Do</h3>
+<ul>
+<li><strong>Convert machine code to assembly</strong> - Translate binary instructions to assembly</li>
+<li><strong>Identify functions and data</strong> - Recognize code vs data sections</li>
+<li><strong>Generate cross-references</strong> - Show relationships between code sections</li>
+<li><strong>Provide analysis tools</strong> - Graphs, symbol tables, and annotations</li>
+<li><strong>Support multiple architectures</strong> - x86, x64, ARM, MIPS, etc.</li>
+</ul>
+<h3 id="static-vs-dynamic-analysis">Static vs Dynamic Analysis</h3>
+<table>
+<thead>
+<tr>
+<th>Static Analysis</th>
+<th>Dynamic Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Examines code without execution</td>
+<td>Analyzes running program</td>
+</tr>
+<tr>
+<td>Fast and safe</td>
+<td>Shows actual runtime behavior</td>
+</tr>
+<tr>
+<td>May miss runtime-dependent code</td>
+<td>Requires execution environment</td>
+</tr>
+<tr>
+<td>Good for overall understanding</td>
+<td>Good for specific execution paths</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ida-pro-overview">IDA Pro Overview</h2>
+<h3 id="ida-pro-features">IDA Pro Features</h3>
+<ul>
+<li><strong>Industry standard</strong> disassembler</li>
+<li><strong>Advanced analysis</strong> - Data flow, control flow analysis</li>
+<li><strong>Scripting support</strong> - IDAPython, IDC</li>
+<li><strong>Plugin ecosystem</strong> - Extensive third-party plugins</li>
+<li><strong>Collaborative features</strong> - Team analysis capabilities</li>
+<li><strong>Multiple file formats</strong> - PE, ELF, Mach-O, raw binary</li>
+</ul>
+<h3 id="ida-pro-interface">IDA Pro Interface</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code>┌─────────────────────────────────────────────────┐
+│ File  Edit  View  Search  Debugger  Options     │
+├─────────────────────────────────────────────────┤
+│ Functions │              IDA View               │
+│ Window    │                                     │
+│           │  .text:00401000 push    ebp         │
+│ main      │  .text:00401001 mov     ebp, esp    │
+│ sub_1010  │  .text:00401003 sub     esp, 40h    │
+│ sub_1050  │  .text:00401006 push    esi         │
+│           │  .text:00401007 push    edi         │
+├───────────┼─────────────────────────────────────┤
+│ Output    │           Hex View                  │
+│ Window    │                                     │
+│           │  00401000: 55 8B EC 83 EC 40 56 57 │
+└───────────┴─────────────────────────────────────┘
+</code></pre></div></td></tr></table></div>
+<h3 id="basic-ida-pro-workflow">Basic IDA Pro Workflow</h3>
+<ol>
+<li><strong>Load binary</strong> - File → Open, select target file</li>
+<li><strong>Auto-analysis</strong> - Let IDA analyze the binary automatically</li>
+<li><strong>Navigate code</strong> - Use Functions window, cross-references</li>
+<li><strong>Rename symbols</strong> - Give meaningful names to functions/variables</li>
+<li><strong>Add comments</strong> - Document your findings</li>
+<li><strong>Create structures</strong> - Define data structures</li>
+<li><strong>Generate pseudocode</strong> - Use F5 for decompiler view</li>
+</ol>
+<h2 id="ghidra-overview">Ghidra Overview</h2>
+<h3 id="ghidra-features">Ghidra Features</h3>
+<ul>
+<li><strong>Free and open source</strong> - Developed by NSA</li>
+<li><strong>Built-in decompiler</strong> - Generates C-like pseudocode</li>
+<li><strong>Version tracking</strong> - Compare different versions of binaries</li>
+<li><strong>Team collaboration</strong> - Shared projects and repositories</li>
+<li><strong>Extensible architecture</strong> - Custom analyzers and plugins</li>
+<li><strong>Cross-platform</strong> - Runs on Windows, Linux, macOS</li>
+</ul>
+<h3 id="ghidra-interface">Ghidra Interface</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code>┌─────────────────────────────────────────────────┐
+│ File  Edit  Navigation  Search  Analysis  Tools │
+├─────────────────────────────────────────────────┤
+│ Program │              Listing                 │
+│ Tree    │                                       │
+│         │  00401000 PUSH       EBP              │
+│ main    │  00401001 MOV        EBP,ESP          │
+│ FUN_... │  00401003 SUB        ESP,0x40         │
+│ data    │  00401006 PUSH       ESI              │
+│         │  00401007 PUSH       EDI              │
+├─────────┼───────────────────────────────────────┤
+│ Decmp.  │           Data Type Manager           │
+│ main    │                                       │
+│ {...}   │  int main(void) {                     │
+│         │    // Function implementation         │
+└─────────┴───────────────────────────────────────┘
+</code></pre></div></td></tr></table></div>
+<h3 id="basic-ghidra-workflow">Basic Ghidra Workflow</h3>
+<ol>
+<li><strong>Create project</strong> - File → New Project</li>
+<li><strong>Import binary</strong> - File → Import File</li>
+<li><strong>Auto-analyze</strong> - Analyze → Auto Analyze</li>
+<li><strong>Navigate code</strong> - Use Program Tree, Symbol Tree</li>
+<li><strong>View decompiler</strong> - Window → Decompiler</li>
+<li><strong>Create data types</strong> - Data Type Manager</li>
+<li><strong>Add bookmarks</strong> - Mark important locations</li>
+</ol>
+<h2 id="practical-example-analyzing-a-simple-binary">Practical Example: Analyzing a Simple Binary</h2>
+<h3 id="sample-c-program">Sample C Program</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// crackme.c</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">check_password</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">secret</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;r3v3rs3&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">secret</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">password</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Enter password: &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">scanf</span><span class="p">(</span><span class="s">&quot;%99s&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">check_password</span><span class="p">(</span><span class="n">password</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Access granted!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Access denied!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Compilation:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile without debug symbols</span>
+gcc<span class="w"> </span>-O0<span class="w"> </span>-o<span class="w"> </span>crackme<span class="w"> </span>crackme.c
+
+<span class="c1"># Strip symbols</span>
+strip<span class="w"> </span>crackme
+</code></pre></div></td></tr></table></div></p>
+<h3 id="ida-pro-analysis">IDA Pro Analysis</h3>
+<h4 id="loading-the-binary">Loading the Binary</h4>
+<ol>
+<li>
+<p><strong>Open in IDA Pro</strong>
+   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>File → Open → Select crackme
+Processor type: PC
+Load debug symbols: No (stripped binary)
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Initial Analysis</strong>
+   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>IDA will automatically:
+- Identify entry point
+- Analyze code sections
+- Create functions
+- Generate cross-references
+</code></pre></div></td></tr></table></div></p>
+</li>
+</ol>
+<h4 id="function-analysis">Function Analysis</h4>
+<p><strong>Entry Point (<code>start</code> function):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">.text:</span><span class="err">08048350</span><span class="w"> </span><span class="nf">start</span><span class="w">           </span><span class="no">proc</span><span class="w"> </span><span class="no">near</span>
+<span class="nl">.text:</span><span class="err">08048350</span><span class="w">                 </span><span class="nf">xor</span><span class="w">     </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">ebp</span>
+<span class="nl">.text:</span><span class="err">08048352</span><span class="w">                 </span><span class="nf">pop</span><span class="w">     </span><span class="no">esi</span>
+<span class="nl">.text:</span><span class="err">08048353</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span>
+<span class="nl">.text:</span><span class="err">08048355</span><span class="w">                 </span><span class="nf">and</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="no">FFFFFFF0h</span>
+<span class="nl">.text:</span><span class="err">08048358</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">eax</span>
+<span class="nl">.text:</span><span class="err">08048359</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">esp</span>
+<span class="nl">.text:</span><span class="err">0804835</span><span class="nf">A</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">edx</span>
+<span class="nl">.text:</span><span class="err">0804835</span><span class="nf">B</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">offset</span><span class="w"> </span><span class="no">__libc_csu_fini</span>
+<span class="nl">.text:</span><span class="err">08048360</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">offset</span><span class="w"> </span><span class="no">__libc_csu_init</span>
+<span class="nl">.text:</span><span class="err">08048365</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">ecx</span>
+<span class="nl">.text:</span><span class="err">08048366</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">esi</span>
+<span class="nl">.text:</span><span class="err">08048367</span><span class="w">                 </span><span class="nf">push</span><span class="w">    </span><span class="no">offset</span><span class="w"> </span><span class="no">main</span>
+<span class="nl">.text:</span><span class="err">0804836</span><span class="nf">C</span><span class="w">                 </span><span class="no">call</span><span class="w">    </span><span class="no">__libc_start_main</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Main Function Analysis:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">.text:</span><span class="err">080483</span><span class="nf">ED</span><span class="w"> </span><span class="no">main</span><span class="w">            </span><span class="no">proc</span><span class="w"> </span><span class="no">near</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">ED</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">ED</span><span class="w"> </span><span class="no">password</span><span class="w">        </span><span class="err">=</span><span class="w"> </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-6</span><span class="no">Ch</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">ED</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">ED</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">ebp</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">EE</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">F0</span><span class="w">                 </span><span class="no">and</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="no">FFFFFFF0h</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">F3</span><span class="w">                 </span><span class="no">sub</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="no">h</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">F6</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">esp</span><span class="p">],</span><span class="w"> </span><span class="no">offset</span><span class="w"> </span><span class="no">aEnterPassword</span><span class="w"> </span><span class="c1">; &quot;Enter password: &quot;</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">FD</span><span class="w">                 </span><span class="no">call</span><span class="w">    </span><span class="no">printf</span>
+<span class="nl">.text:</span><span class="err">08048402</span><span class="w">                 </span><span class="nf">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="w"> </span><span class="no">aS</span><span class="w">     </span><span class="c1">; &quot;%99s&quot;</span>
+<span class="nl">.text:</span><span class="err">08048407</span><span class="w">                 </span><span class="nf">lea</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">70</span><span class="no">h</span><span class="err">+</span><span class="no">password</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="err">0804840</span><span class="nf">B</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="no">edx</span>
+<span class="nl">.text:</span><span class="err">0804840</span><span class="nf">F</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="p">[</span><span class="no">esp</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="nl">.text:</span><span class="err">08048412</span><span class="w">                 </span><span class="nf">call</span><span class="w">    </span><span class="no">scanf</span>
+<span class="nl">.text:</span><span class="err">08048417</span><span class="w">                 </span><span class="nf">lea</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">70</span><span class="no">h</span><span class="err">+</span><span class="no">password</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="err">0804841</span><span class="nf">B</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="p">[</span><span class="no">esp</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="nl">.text:</span><span class="err">0804841</span><span class="nf">E</span><span class="w">                 </span><span class="no">call</span><span class="w">    </span><span class="no">check_password</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>check_password Function:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span><span class="w"> </span><span class="no">check_password</span><span class="w">  </span><span class="no">proc</span><span class="w"> </span><span class="no">near</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span><span class="w"> </span><span class="no">secret</span><span class="w">          </span><span class="err">=</span><span class="w"> </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="mi">-10</span><span class="no">h</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span><span class="w"> </span><span class="no">input</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w">  </span><span class="mi">8</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C4</span><span class="w">                 </span><span class="no">push</span><span class="w">    </span><span class="no">ebp</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C5</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">C7</span><span class="w">                 </span><span class="no">sub</span><span class="w">     </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="no">h</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">CA</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="no">secret</span><span class="p">],</span><span class="w"> </span><span class="mi">72337233</span><span class="no">h</span><span class="w">    </span><span class="c1">; &quot;r3v3&quot;</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">D1</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">dword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="no">secret</span><span class="err">+</span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="mi">72337672</span><span class="no">h</span><span class="w">  </span><span class="c1">; &quot;rs3&quot;</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">D8</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="no">secret</span><span class="err">+</span><span class="mi">7</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">DC</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="no">input</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">DF</span><span class="w">                 </span><span class="no">lea</span><span class="w">     </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="no">secret</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">E2</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="p">[</span><span class="no">esp</span><span class="err">+</span><span class="mi">4</span><span class="p">],</span><span class="w"> </span><span class="no">edx</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">E6</span><span class="w">                 </span><span class="no">mov</span><span class="w">     </span><span class="p">[</span><span class="no">esp</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span>
+<span class="nl">.text:</span><span class="err">080483</span><span class="nf">E9</span><span class="w">                 </span><span class="no">call</span><span class="w">    </span><span class="no">strcmp</span>
+</code></pre></div></td></tr></table></div></p>
+<h4 id="ida-pro-analysis-techniques">IDA Pro Analysis Techniques</h4>
+<p><strong>1. Renaming Functions:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Right-click function → Rename
+F2 key to rename symbols
+</code></pre></div></td></tr></table></div></p>
+<p><strong>2. Adding Comments:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>; or : key to add comments
+Repeatable comments with Shift+;
+</code></pre></div></td></tr></table></div></p>
+<p><strong>3. Creating Structures:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>Structures view → Insert → Create structure
+Define members and types
+Apply to data in disassembly
+</code></pre></div></td></tr></table></div></p>
+<p><strong>4. Cross-References:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Ctrl+X to show cross-references
+Navigate between calls and references
+</code></pre></div></td></tr></table></div></p>
+<h3 id="ghidra-analysis">Ghidra Analysis</h3>
+<h4 id="loading-and-analysis">Loading and Analysis</h4>
+<ol>
+<li>
+<p><strong>Create Project:</strong>
+   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>File → New Project → Non-Shared Project
+Project Name: &quot;CrackMe Analysis&quot;
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Import Binary:</strong>
+   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>File → Import File → Select crackme
+Format: Executable and Linking Format (ELF)
+Language: x86:LE:32:default
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Auto Analysis:</strong>
+   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>Analysis → Auto Analyze
+Enable all analyzers
+Click &quot;Analyze&quot;
+</code></pre></div></td></tr></table></div></p>
+</li>
+</ol>
+<h4 id="decompiler-view">Decompiler View</h4>
+<p><strong>Main Function Decompiled:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">undefined4</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">iVar1</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="n">local_6c</span><span class="w"> </span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Enter password: &quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">__isoc99_scanf</span><span class="p">(</span><span class="s">&quot;%99s&quot;</span><span class="p">,</span><span class="n">local_6c</span><span class="p">);</span>
+<span class="w">  </span><span class="n">iVar1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">check_password</span><span class="p">(</span><span class="n">local_6c</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">iVar1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">puts</span><span class="p">(</span><span class="s">&quot;Access denied!&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">puts</span><span class="p">(</span><span class="s">&quot;Access granted!&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>check_password Function Decompiled:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">undefined4</span><span class="w"> </span><span class="nf">check_password</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">param_1</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">iVar1</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="n">local_10</span><span class="w"> </span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+
+<span class="w">  </span><span class="n">strcpy</span><span class="p">(</span><span class="n">local_10</span><span class="p">,</span><span class="s">&quot;r3v3rs3&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">iVar1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">param_1</span><span class="p">,</span><span class="n">local_10</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">uint</span><span class="p">)(</span><span class="n">iVar1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<h4 id="ghidra-analysis-techniques">Ghidra Analysis Techniques</h4>
+<p><strong>1. Improving Function Signatures:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Right-click function → Edit Function Signature
+Change return types and parameter names
+</code></pre></div></td></tr></table></div></p>
+<p><strong>2. Retyping Variables:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Right-click variable → Retype Variable
+Choose appropriate data type
+</code></pre></div></td></tr></table></div></p>
+<p><strong>3. Creating Data Types:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Data Type Manager → Create new types
+Define structures and enums
+</code></pre></div></td></tr></table></div></p>
+<p><strong>4. Bookmarking:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>Right-click → Bookmark
+Add notes and categories
+</code></pre></div></td></tr></table></div></p>
+<h2 id="advanced-analysis-techniques">Advanced Analysis Techniques</h2>
+<h3 id="string-analysis">String Analysis</h3>
+<p><strong>Finding Strings in IDA:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>View → Open subviews → Strings
+Shift+F12 to open strings window
+Filter by string content or encoding
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Finding Strings in Ghidra:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>Search → For Strings
+Configure minimum length and encoding
+Navigate to string references
+</code></pre></div></td></tr></table></div></p>
+<h3 id="cross-reference-analysis">Cross-Reference Analysis</h3>
+<p><strong>Function Call Graph (IDA):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>View → Graphs → Function Calls
+Visualize function relationships
+Identify critical paths
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Function Call Trees (Ghidra):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>Window → Function Call Trees
+Show incoming and outgoing calls
+Analyze call depth and complexity
+</code></pre></div></td></tr></table></div></p>
+<h3 id="data-flow-analysis">Data Flow Analysis</h3>
+<p><strong>Tracking Variable Usage:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>IDA: Alt+T for operand types
+Ghidra: Right-click → References → Show References to
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Identifying Constants and Magic Numbers:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>Look for immediate values in assembly
+Check for hardcoded strings or numbers
+Identify cryptographic constants
+</code></pre></div></td></tr></table></div></p>
+<h2 id="scripting-and-automation">Scripting and Automation</h2>
+<h3 id="idapython-example">IDAPython Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># find_strings.py - Find specific string patterns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">idautils</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">idc</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_string_patterns</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find strings matching specific patterns&quot;&quot;&quot;</span>
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;secret&quot;</span><span class="p">,</span> <span class="s2">&quot;admin&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Iterate through all strings</span>
+    <span class="k">for</span> <span class="n">string_ea</span> <span class="ow">in</span> <span class="n">idautils</span><span class="o">.</span><span class="n">Strings</span><span class="p">():</span>
+        <span class="n">string_val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">string_ea</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">string_val</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found: </span><span class="si">{</span><span class="n">string_val</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">string_ea</span><span class="o">.</span><span class="n">ea</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Find cross-references to this string</span>
+                <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">idautils</span><span class="o">.</span><span class="n">DataRefsTo</span><span class="p">(</span><span class="n">string_ea</span><span class="o">.</span><span class="n">ea</span><span class="p">):</span>
+                    <span class="n">func_name</span> <span class="o">=</span> <span class="n">idc</span><span class="o">.</span><span class="n">get_func_name</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Referenced in: </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">find_string_patterns</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="ghidra-script-example">Ghidra Script Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// FindCrypto.java - Find potential cryptographic constants</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.app.script.GhidraScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.listing.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.scalar.Scalar</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">FindCrypto</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">GhidraScript</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// Common crypto constants</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">long</span><span class="o">[]</span><span class="w"> </span><span class="n">cryptoConstants</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="mh">0x67452301L</span><span class="p">,</span><span class="w">  </span><span class="c1">// MD5</span>
+<span class="w">        </span><span class="mh">0xEFCDAB89L</span><span class="p">,</span><span class="w">  </span><span class="c1">// MD5</span>
+<span class="w">        </span><span class="mh">0x98BADCFEL</span><span class="p">,</span><span class="w">  </span><span class="c1">// MD5</span>
+<span class="w">        </span><span class="mh">0x10325476L</span><span class="p">,</span><span class="w">  </span><span class="c1">// MD5</span>
+<span class="w">        </span><span class="mh">0x5A827999L</span><span class="p">,</span><span class="w">  </span><span class="c1">// SHA-1</span>
+<span class="w">        </span><span class="mh">0x6ED9EBA1L</span><span class="p">,</span><span class="w">  </span><span class="c1">// SHA-1</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Listing</span><span class="w"> </span><span class="n">listing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentProgram</span><span class="p">.</span><span class="na">getListing</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Search through all instructions</span>
+<span class="w">        </span><span class="n">InstructionIterator</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">listing</span><span class="p">.</span><span class="na">getInstructions</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">.</span><span class="na">hasNext</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Instruction</span><span class="w"> </span><span class="n">instr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iter</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
+
+<span class="w">            </span><span class="c1">// Check operands for crypto constants</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">instr</span><span class="p">.</span><span class="na">getNumOperands</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">Object</span><span class="o">[]</span><span class="w"> </span><span class="n">opObjects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instr</span><span class="p">.</span><span class="na">getOpObjects</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">obj</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">opObjects</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="w"> </span><span class="k">instanceof</span><span class="w"> </span><span class="n">Scalar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="kt">long</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">Scalar</span><span class="p">)</span><span class="w"> </span><span class="n">obj</span><span class="p">).</span><span class="na">getUnsignedValue</span><span class="p">();</span>
+
+<span class="w">                        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">constant</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">cryptoConstants</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">constant</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Crypto constant found: 0x%x at %s\n&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">                                       </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">instr</span><span class="p">.</span><span class="na">getAddress</span><span class="p">());</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                        </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="analysis-workflow">Analysis Workflow</h3>
+<ol>
+<li><strong>Initial Reconnaissance</strong></li>
+<li>Check file type and format</li>
+<li>Identify packing or obfuscation</li>
+<li>
+<p>Look for obvious strings and imports</p>
+</li>
+<li>
+<p><strong>Function Identification</strong></p>
+</li>
+<li>Start with main() or entry point</li>
+<li>Identify library functions vs custom code</li>
+<li>
+<p>Map out high-level program flow</p>
+</li>
+<li>
+<p><strong>Detailed Analysis</strong></p>
+</li>
+<li>Analyze critical functions first</li>
+<li>Document findings with comments</li>
+<li>
+<p>Create meaningful symbol names</p>
+</li>
+<li>
+<p><strong>Documentation</strong></p>
+</li>
+<li>Maintain analysis notes</li>
+<li>Document discovered algorithms</li>
+<li>Create function summaries</li>
+</ol>
+<h3 id="naming-conventions">Naming Conventions</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code>Functions:
+- check_password()
+- decrypt_data()
+- validate_license()
+
+Variables:
+- user_input
+- decryption_key
+- file_buffer
+
+Labels:
+- error_exit
+- main_loop
+- decrypt_success
+</code></pre></div></td></tr></table></div>
+<h3 id="common-patterns-to-recognize">Common Patterns to Recognize</h3>
+<p><strong>Anti-Analysis Techniques:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Anti-debugging</span>
+<span class="nf">call</span><span class="w">    </span><span class="no">IsDebuggerPresent</span>
+<span class="nf">test</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span>
+<span class="nf">jnz</span><span class="w">     </span><span class="no">exit_program</span>
+
+<span class="c1">; Timing checks</span>
+<span class="nf">rdtsc</span><span class="w">                    </span><span class="c1">; Read time stamp counter</span>
+<span class="c1">; ... some operations</span>
+<span class="nf">rdtsc</span><span class="w">                    </span><span class="c1">; Read again</span>
+<span class="c1">; Compare difference</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>String Obfuscation:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; XOR obfuscation</span>
+<span class="nf">mov</span><span class="w">     </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esi</span><span class="p">]</span><span class="w">        </span><span class="c1">; Load encrypted byte</span>
+<span class="nf">xor</span><span class="w">     </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="no">h</span><span class="w">          </span><span class="c1">; XOR with key</span>
+<span class="nf">mov</span><span class="w">     </span><span class="p">[</span><span class="no">edi</span><span class="p">],</span><span class="w"> </span><span class="no">al</span><span class="w">        </span><span class="c1">; Store decrypted byte</span>
+<span class="nf">inc</span><span class="w">     </span><span class="no">esi</span>
+<span class="nf">inc</span><span class="w">     </span><span class="no">edi</span>
+<span class="nf">loop</span><span class="w">    </span><span class="no">decrypt_loop</span>
+</code></pre></div></td></tr></table></div></p>
+<h2 id="tool-comparison">Tool Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>IDA Pro</th>
+<th>Ghidra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost</td>
+<td>Expensive</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>Decompiler</td>
+<td>Separate license</td>
+<td>Included</td>
+</tr>
+<tr>
+<td>User Interface</td>
+<td>More polished</td>
+<td>Functional</td>
+</tr>
+<tr>
+<td>Scripting</td>
+<td>IDAPython, IDC</td>
+<td>Java, Python</td>
+</tr>
+<tr>
+<td>Collaboration</td>
+<td>Team features</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>File Format Support</td>
+<td>Extensive</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>Plugin Ecosystem</td>
+<td>Large</td>
+<td>Growing</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Disassembler Fundamentals</p>
+<ul>
+<li><strong>Choose the right tool</strong> for your needs and budget</li>
+<li><strong>Start with automatic analysis</strong> then refine manually</li>
+<li><strong>Use meaningful names</strong> for functions and variables</li>
+<li><strong>Document your findings</strong> with comments and notes</li>
+<li><strong>Learn scripting</strong> to automate repetitive tasks</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Analysis Efficiency</p>
+<ul>
+<li>Begin with high-level overview before diving into details</li>
+<li>Focus on critical functions first (main, authentication, crypto)</li>
+<li>Use cross-references to understand data flow</li>
+<li>Leverage decompiler output but verify with assembly</li>
+<li>Practice pattern recognition for common constructs</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Common Pitfalls</p>
+<ul>
+<li>Don't trust decompiler output blindly</li>
+<li>Be aware of compiler optimizations affecting analysis</li>
+<li>Watch for anti-analysis and obfuscation techniques</li>
+<li>Consider multiple architectures and calling conventions</li>
+<li>Maintain organized analysis notes and backups</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../02-control-flow/">Control Flow &amp; Function Analysis</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

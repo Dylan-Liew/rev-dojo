@@ -1,0 +1,1702 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/foundations/03-assembly/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Assembly Basics (x86 & x64) - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#assembly-basics-x86-x64" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Assembly Basics (x86 &amp; x64)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x86-vs-x64-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      x86 vs x64 Differences
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#register-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Register Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x86-registers-32-bit" class="md-nav__link">
+    <span class="md-ellipsis">
+      x86 Registers (32-bit)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#x64-registers-64-bit" class="md-nav__link">
+    <span class="md-ellipsis">
+      x64 Registers (64-bit)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register Usage Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instruction-set-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instruction Set Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instruction Set Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-movement-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Movement Instructions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arithmetic-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arithmetic Instructions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#control-flow-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Control Flow Instructions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-calls-and-stack-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Calls and Stack Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#addressing-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Addressing Modes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Addressing Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x86-addressing-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      x86 Addressing Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#x64-addressing-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      x64 Addressing Enhancements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assembly-syntax-intel-vs-att" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assembly Syntax: Intel vs AT&amp;T
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Assembly Syntax: Intel vs AT&amp;T">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intel-syntax-windows-common-in-disassemblers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intel Syntax (Windows, common in disassemblers)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#att-syntax-linux-gcc-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      AT&amp;T Syntax (Linux, GCC default)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stack-frame-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stack Frame Structure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stack Frame Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-prologue-and-epilogue" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Prologue and Epilogue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#x64-function-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      x64 Function Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#calling-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Calling Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x86-calling-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      x86 Calling Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="x86 Calling Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cdecl-c-calling-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      cdecl (C calling convention)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdcall-windows-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      stdcall (Windows API)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#x64-calling-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      x64 Calling Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="x64 Calling Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-v-abi-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      System V ABI (Linux)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microsoft-x64-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Microsoft x64 (Windows)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#string-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      String Operations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simd-instructions-mmxsseavx" class="md-nav__link">
+    <span class="md-ellipsis">
+      SIMD Instructions (MMX/SSE/AVX)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SIMD Instructions (MMX/SSE/AVX)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sse-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSE Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#avx-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      AVX Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-simple-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Simple Function
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-array-iteration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: Array Iteration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-string-length" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 3: String Length
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Assembly
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging Assembly">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-gdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using GDB
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objdump-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Objdump Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="assembly-basics-x86-x64">Assembly Basics (x86 &amp; x64)</h1>
+<p>Assembly language is the bridge between high-level code and machine instructions. Understanding assembly is crucial for reverse engineering and binary exploitation.</p>
+<h2 id="architecture-overview">Architecture Overview</h2>
+<h3 id="x86-vs-x64-differences">x86 vs x64 Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>x86 (32-bit)</th>
+<th>x64 (64-bit)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Address Width</td>
+<td>32 bits (4 GB)</td>
+<td>64 bits (16 EB)</td>
+</tr>
+<tr>
+<td>General Registers</td>
+<td>8 (EAX-EDI)</td>
+<td>16 (RAX-R15)</td>
+</tr>
+<tr>
+<td>Calling Convention</td>
+<td>cdecl, stdcall</td>
+<td>System V ABI, Microsoft x64</td>
+</tr>
+<tr>
+<td>Pointer Size</td>
+<td>4 bytes</td>
+<td>8 bytes</td>
+</tr>
+<tr>
+<td>Default Operation Size</td>
+<td>32 bits</td>
+<td>64 bits</td>
+</tr>
+</tbody>
+</table>
+<h2 id="register-architecture">Register Architecture</h2>
+<h3 id="x86-registers-32-bit">x86 Registers (32-bit)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code>General Purpose Registers:
+EAX (Accumulator)    - Return values, arithmetic
+EBX (Base)           - Base pointer for memory
+ECX (Counter)        - Loop counter, string operations
+EDX (Data)           - I/O operations, arithmetic
+ESI (Source Index)   - String source pointer
+EDI (Dest Index)     - String destination pointer
+EBP (Base Pointer)   - Stack frame base
+ESP (Stack Pointer)  - Stack top
+
+Segment Registers:
+CS (Code Segment)
+DS (Data Segment)
+ES (Extra Segment)
+FS, GS (Additional segments)
+SS (Stack Segment)
+
+Status/Control:
+EFLAGS - Processor status and control flags
+EIP    - Instruction Pointer
+</code></pre></div></td></tr></table></div>
+<h3 id="x64-registers-64-bit">x64 Registers (64-bit)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code>64-bit Extensions of x86 registers:
+RAX, RBX, RCX, RDX, RSI, RDI, RBP, RSP
+
+Additional 64-bit registers:
+R8, R9, R10, R11, R12, R13, R14, R15
+
+Register Naming Convention:
+64-bit: RAX (full register)
+32-bit: EAX (lower 32 bits)
+16-bit: AX  (lower 16 bits)
+8-bit:  AL  (lower 8 bits), AH (higher 8 bits of lower 16)
+
+New 64-bit registers (R8-R15):
+64-bit: R8
+32-bit: R8D
+16-bit: R8W
+8-bit:  R8B
+</code></pre></div></td></tr></table></div>
+<h3 id="register-usage-examples">Register Usage Examples</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; x86 Register Manipulation</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x12345678</span><span class="w">    </span><span class="c1">; EAX = 0x12345678</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x9ABC</span><span class="w">         </span><span class="c1">; EAX = 0x12349ABC (only lower 16 bits changed)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="mi">0xEF</span><span class="w">           </span><span class="c1">; EAX = 0x12349AEF (only lower 8 bits changed)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ah</span><span class="p">,</span><span class="w"> </span><span class="mi">0xCD</span><span class="w">           </span><span class="c1">; EAX = 0x12349CEF (bits 8-15 changed)</span>
+
+<span class="c1">; x64 Register Manipulation</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x123456789ABCDEF0</span><span class="w">  </span><span class="c1">; RAX = 0x123456789ABCDEF0</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x11111111</span><span class="w">          </span><span class="c1">; RAX = 0x0000000011111111 (upper 32 bits zeroed!)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x2222</span><span class="w">               </span><span class="c1">; RAX = 0x0000000011112222</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">al</span><span class="p">,</span><span class="w"> </span><span class="mi">0x33</span><span class="w">                 </span><span class="c1">; RAX = 0x0000000011112233</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="instruction-set-overview">Instruction Set Overview</h2>
+<h3 id="data-movement-instructions">Data Movement Instructions</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; MOV - Move data</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="w">              </span><span class="c1">; eax = 42 (immediate)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; eax = ebx (register to register)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="p">]</span><span class="w">           </span><span class="c1">; eax = value at address ebx (memory to register)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="p">[</span><span class="no">eax</span><span class="p">],</span><span class="w"> </span><span class="no">ebx</span><span class="w">           </span><span class="c1">; store ebx at address eax (register to memory)</span>
+
+<span class="c1">; LEA - Load Effective Address (calculate address)</span>
+<span class="nf">lea</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">ecx</span><span class="p">*</span><span class="mi">2</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="w">  </span><span class="c1">; eax = ebx + ecx*2 + 4 (address calculation)</span>
+
+<span class="c1">; XCHG - Exchange values</span>
+<span class="nf">xchg</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">            </span><span class="c1">; swap eax and ebx</span>
+
+<span class="c1">; x64 examples</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x123456789ABCDEF0</span><span class="w">  </span><span class="c1">; 64-bit immediate</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rbx</span><span class="p">]</span><span class="w">               </span><span class="c1">; load 64-bit value from memory</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">qword</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">rax</span><span class="p">],</span><span class="w"> </span><span class="no">rbx</span><span class="w">     </span><span class="c1">; store 64-bit value to memory</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="arithmetic-instructions">Arithmetic Instructions</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Addition and Subtraction</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; eax = eax + ebx</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="w">              </span><span class="c1">; eax = eax + 10</span>
+<span class="nf">sub</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; eax = eax - ebx</span>
+<span class="nf">inc</span><span class="w"> </span><span class="no">eax</span><span class="w">                  </span><span class="c1">; eax = eax + 1</span>
+<span class="nf">dec</span><span class="w"> </span><span class="no">eax</span><span class="w">                  </span><span class="c1">; eax = eax - 1</span>
+
+<span class="c1">; Multiplication</span>
+<span class="nf">mul</span><span class="w"> </span><span class="no">ebx</span><span class="w">                  </span><span class="c1">; edx:eax = eax * ebx (unsigned)</span>
+<span class="nf">imul</span><span class="w"> </span><span class="no">ebx</span><span class="w">                 </span><span class="c1">; edx:eax = eax * ebx (signed)</span>
+<span class="nf">imul</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">            </span><span class="c1">; eax = eax * ebx (32-bit result)</span>
+<span class="nf">imul</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w">         </span><span class="c1">; eax = ebx * 5</span>
+
+<span class="c1">; Division</span>
+<span class="nf">div</span><span class="w"> </span><span class="no">ebx</span><span class="w">                  </span><span class="c1">; eax = edx:eax / ebx, edx = remainder (unsigned)</span>
+<span class="nf">idiv</span><span class="w"> </span><span class="no">ebx</span><span class="w">                 </span><span class="c1">; eax = edx:eax / ebx, edx = remainder (signed)</span>
+
+<span class="c1">; Bitwise Operations</span>
+<span class="nf">and</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0xFF</span><span class="w">            </span><span class="c1">; eax = eax &amp; 0xFF</span>
+<span class="nf">or</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x100</span><span class="w">            </span><span class="c1">; eax = eax | 0x100</span>
+<span class="nf">xor</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span><span class="w">             </span><span class="c1">; eax = 0 (common way to zero register)</span>
+<span class="nf">not</span><span class="w"> </span><span class="no">eax</span><span class="w">                  </span><span class="c1">; eax = ~eax (bitwise NOT)</span>
+<span class="nf">shl</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w">               </span><span class="c1">; eax = eax &lt;&lt; 2 (shift left)</span>
+<span class="nf">shr</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w">               </span><span class="c1">; eax = eax &gt;&gt; 2 (shift right, unsigned)</span>
+<span class="nf">sar</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w">               </span><span class="c1">; eax = eax &gt;&gt; 2 (shift right, signed)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="control-flow-instructions">Control Flow Instructions</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Unconditional Jump</span>
+<span class="nf">jmp</span><span class="w"> </span><span class="no">label</span><span class="w">                </span><span class="c1">; Jump to label</span>
+<span class="nf">jmp</span><span class="w"> </span><span class="no">eax</span><span class="w">                  </span><span class="c1">; Jump to address in eax</span>
+<span class="nf">jmp</span><span class="w"> </span><span class="p">[</span><span class="no">eax</span><span class="p">]</span><span class="w">                </span><span class="c1">; Jump to address stored at eax</span>
+
+<span class="c1">; Conditional Jumps (after CMP or TEST)</span>
+<span class="nf">cmp</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; Compare eax and ebx (sets flags)</span>
+<span class="nf">je</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if equal (ZF=1)</span>
+<span class="nf">jne</span><span class="w"> </span><span class="no">label</span><span class="w">                </span><span class="c1">; Jump if not equal (ZF=0)</span>
+<span class="nf">jl</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if less (SF≠OF)</span>
+<span class="nf">jle</span><span class="w"> </span><span class="no">label</span><span class="w">                </span><span class="c1">; Jump if less or equal</span>
+<span class="nf">jg</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if greater</span>
+<span class="nf">jge</span><span class="w"> </span><span class="no">label</span><span class="w">                </span><span class="c1">; Jump if greater or equal</span>
+<span class="nf">ja</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if above (unsigned &gt;)</span>
+<span class="nf">jb</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if below (unsigned &lt;)</span>
+
+<span class="c1">; Test instruction</span>
+<span class="nf">test</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span><span class="w">            </span><span class="c1">; Test if eax is zero (sets flags)</span>
+<span class="nf">jz</span><span class="w"> </span><span class="no">label</span><span class="w">                 </span><span class="c1">; Jump if zero</span>
+<span class="nf">jnz</span><span class="w"> </span><span class="no">label</span><span class="w">                </span><span class="c1">; Jump if not zero</span>
+
+<span class="c1">; Loop instructions</span>
+<span class="nf">loop</span><span class="w"> </span><span class="no">label</span><span class="w">               </span><span class="c1">; Decrement ECX, jump if ECX != 0</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="function-calls-and-stack-operations">Function Calls and Stack Operations</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Function calls</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function_name</span><span class="w">       </span><span class="c1">; Push return address, jump to function</span>
+<span class="nf">ret</span><span class="w">                      </span><span class="c1">; Pop return address, jump back</span>
+<span class="nf">ret</span><span class="w"> </span><span class="mi">8</span><span class="w">                    </span><span class="c1">; Return and clean up 8 bytes from stack</span>
+
+<span class="c1">; Stack operations</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">eax</span><span class="w">                 </span><span class="c1">; Decrease ESP by 4, store EAX at [ESP]</span>
+<span class="nf">pop</span><span class="w"> </span><span class="no">eax</span><span class="w">                  </span><span class="c1">; Load [ESP] into EAX, increase ESP by 4</span>
+<span class="nf">pushad</span><span class="w">                   </span><span class="c1">; Push all general registers</span>
+<span class="nf">popad</span><span class="w">                    </span><span class="c1">; Pop all general registers</span>
+
+<span class="c1">; x64 stack operations</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">rax</span><span class="w">                 </span><span class="c1">; Decrease RSP by 8, store RAX at [RSP]</span>
+<span class="nf">pop</span><span class="w"> </span><span class="no">rax</span><span class="w">                  </span><span class="c1">; Load [RSP] into RAX, increase RSP by 8</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="addressing-modes">Addressing Modes</h2>
+<h3 id="x86-addressing-modes">x86 Addressing Modes</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Direct addressing</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">12345</span><span class="w">           </span><span class="c1">; Immediate value</span>
+
+<span class="c1">; Register direct</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; Register to register</span>
+
+<span class="c1">; Memory addressing modes</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="mi">1234</span><span class="p">]</span><span class="w">          </span><span class="c1">; Direct memory (absolute address)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="p">]</span><span class="w">           </span><span class="c1">; Register indirect</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="w">       </span><span class="c1">; Register + displacement</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">esi</span><span class="p">]</span><span class="w">     </span><span class="c1">; Register + register</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">esi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="c1">; Register + register + displacement</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">esi</span><span class="p">*</span><span class="mi">2</span><span class="p">]</span><span class="w">   </span><span class="c1">; Register + scaled register</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">esi</span><span class="p">*</span><span class="mi">4</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="c1">; Full addressing: base + index*scale + displacement</span>
+
+<span class="c1">; Scale factors: 1, 2, 4, 8 (for byte, word, dword, qword indexing)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="x64-addressing-enhancements">x64 Addressing Enhancements</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; RIP-relative addressing (position independent)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rip</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">offset</span><span class="p">]</span><span class="w">   </span><span class="c1">; Relative to instruction pointer</span>
+
+<span class="c1">; Extended addressing with R8-R15</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">r8</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">r9</span><span class="p">*</span><span class="mi">2</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">16</span><span class="p">]</span><span class="w"> </span><span class="c1">; Using new registers</span>
+
+<span class="c1">; 64-bit displacement</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rbx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">0x123456789</span><span class="p">]</span><span class="w"> </span><span class="c1">; Large displacement</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="assembly-syntax-intel-vs-att">Assembly Syntax: Intel vs AT&amp;T</h2>
+<h3 id="intel-syntax-windows-common-in-disassemblers">Intel Syntax (Windows, common in disassemblers)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">ebx</span><span class="w">             </span><span class="c1">; destination, source</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebx</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span><span class="w">       </span><span class="c1">; brackets for memory</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="att-syntax-linux-gcc-default">AT&amp;T Syntax (Linux, GCC default)</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nf">movl</span><span class="w"> </span><span class="nv">%ebx</span><span class="p">,</span><span class="w"> </span><span class="nv">%eax</span><span class="w">          </span><span class="c1">; source, destination (% prefix)</span>
+<span class="nf">addl</span><span class="w"> </span><span class="mi">4</span><span class="p">(</span><span class="nv">%ebx</span><span class="p">),</span><span class="w"> </span><span class="nv">%eax</span><span class="w">       </span><span class="c1">; parentheses for memory</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="stack-frame-structure">Stack Frame Structure</h2>
+<h3 id="function-prologue-and-epilogue">Function Prologue and Epilogue</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Function prologue (x86)</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">ebp</span><span class="w">                 </span><span class="c1">; Save old base pointer</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span><span class="w">             </span><span class="c1">; Set up new base pointer</span>
+<span class="nf">sub</span><span class="w"> </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w">              </span><span class="c1">; Allocate 16 bytes for local variables</span>
+
+<span class="c1">; Function body</span>
+<span class="nf">mov</span><span class="w"> </span><span class="p">[</span><span class="no">ebp-4</span><span class="p">],</span><span class="w"> </span><span class="no">eax</span><span class="w">         </span><span class="c1">; Store local variable</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">8</span><span class="p">]</span><span class="w">         </span><span class="c1">; Access first parameter</span>
+
+<span class="c1">; Function epilogue</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="no">ebp</span><span class="w">             </span><span class="c1">; Restore stack pointer</span>
+<span class="nf">pop</span><span class="w"> </span><span class="no">ebp</span><span class="w">                  </span><span class="c1">; Restore old base pointer</span>
+<span class="nf">ret</span><span class="w">                      </span><span class="c1">; Return</span>
+
+<span class="c1">; Simplified epilogue</span>
+<span class="nf">leave</span><span class="w">                    </span><span class="c1">; Equivalent to: mov esp, ebp; pop ebp</span>
+<span class="nf">ret</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="x64-function-structure">x64 Function Structure</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; x64 function prologue</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">rbp</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rbp</span><span class="p">,</span><span class="w"> </span><span class="no">rsp</span>
+<span class="nf">sub</span><span class="w"> </span><span class="no">rsp</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w">              </span><span class="c1">; Allocate space (aligned to 16 bytes)</span>
+
+<span class="c1">; Shadow space in Windows x64 (32 bytes for register parameters)</span>
+<span class="c1">; Function body can use [rbp-8], [rbp-16], etc. for locals</span>
+
+<span class="c1">; x64 epilogue</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">rsp</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w">              </span><span class="c1">; Deallocate space</span>
+<span class="nf">pop</span><span class="w"> </span><span class="no">rbp</span>
+<span class="nf">ret</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="calling-conventions">Calling Conventions</h2>
+<h3 id="x86-calling-conventions">x86 Calling Conventions</h3>
+<h4 id="cdecl-c-calling-convention">cdecl (C calling convention)</h4>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Caller&#39;s responsibility to clean stack</span>
+<span class="c1">; Parameters pushed right to left</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param3</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param2</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param1</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">esp</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="w">              </span><span class="c1">; Caller cleans stack (3 params * 4 bytes)</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="stdcall-windows-api">stdcall (Windows API)</h4>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Callee cleans stack</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param3</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param2</span><span class="w">  </span>
+<span class="no">push</span><span class="w"> </span><span class="no">param1</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function</span><span class="w">            </span><span class="c1">; Function will clean its own stack</span>
+<span class="c1">; No stack cleanup needed by caller</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="x64-calling-conventions">x64 Calling Conventions</h3>
+<h4 id="system-v-abi-linux">System V ABI (Linux)</h4>
+<ul>
+<li>First 6 integer/pointer args: RDI, RSI, RDX, RCX, R8, R9</li>
+<li>First 8 floating-point args: XMM0-XMM7</li>
+<li>Additional args on stack</li>
+<li>Return value in RAX</li>
+</ul>
+<h4 id="microsoft-x64-windows">Microsoft x64 (Windows)</h4>
+<ul>
+<li>First 4 args: RCX, RDX, R8, R9</li>
+<li>First 4 floating-point args: XMM0-XMM3</li>
+<li>Additional args on stack</li>
+<li>32-byte shadow space required</li>
+<li>Return value in RAX</li>
+</ul>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Windows x64 example</span>
+<span class="nf">sub</span><span class="w"> </span><span class="no">rsp</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w">              </span><span class="c1">; Allocate shadow space</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rcx</span><span class="p">,</span><span class="w"> </span><span class="no">param1</span><span class="w">          </span><span class="c1">; First parameter</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">rdx</span><span class="p">,</span><span class="w"> </span><span class="no">param2</span><span class="w">          </span><span class="c1">; Second parameter</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">r8</span><span class="p">,</span><span class="w"> </span><span class="no">param3</span><span class="w">           </span><span class="c1">; Third parameter</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">r9</span><span class="p">,</span><span class="w"> </span><span class="no">param4</span><span class="w">           </span><span class="c1">; Fourth parameter</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param6</span><span class="w">              </span><span class="c1">; Sixth parameter (stack)</span>
+<span class="nf">push</span><span class="w"> </span><span class="no">param5</span><span class="w">              </span><span class="c1">; Fifth parameter (stack)</span>
+<span class="nf">call</span><span class="w"> </span><span class="no">function</span>
+<span class="nf">add</span><span class="w"> </span><span class="no">rsp</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="w">              </span><span class="c1">; Clean up (32 shadow + 16 params)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="string-operations">String Operations</h2>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; String instructions (use ESI/EDI as pointers, ECX as counter)</span>
+
+<span class="c1">; Move string data</span>
+<span class="nf">cld</span><span class="w">                      </span><span class="c1">; Clear direction flag (forward)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">source</span><span class="w">          </span><span class="c1">; Source address</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">dest</span><span class="w">            </span><span class="c1">; Destination address</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">length</span><span class="w">          </span><span class="c1">; Number of elements</span>
+<span class="na">rep</span><span class="w"> </span><span class="nf">movsb</span><span class="w">                </span><span class="c1">; Repeat move byte (copy string)</span>
+<span class="na">rep</span><span class="w"> </span><span class="nf">movsw</span><span class="w">                </span><span class="c1">; Repeat move word</span>
+<span class="na">rep</span><span class="w"> </span><span class="nf">movsd</span><span class="w">                </span><span class="c1">; Repeat move dword</span>
+
+<span class="c1">; Compare strings</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="no">string1</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">string2</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">length</span>
+<span class="na">rep</span><span class="nf">e</span><span class="w"> </span><span class="no">cmpsb</span><span class="w">               </span><span class="c1">; Compare bytes while equal</span>
+
+<span class="c1">; Scan string (find character)</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">string</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="no">A</span><span class="err">&#39;</span><span class="w">             </span><span class="c1">; Character to find</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">length</span>
+<span class="na">rep</span><span class="nf">ne</span><span class="w"> </span><span class="no">scasb</span><span class="w">              </span><span class="c1">; Scan while not equal</span>
+
+<span class="c1">; Store string</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">buffer</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w">               </span><span class="c1">; Value to store</span>
+<span class="nf">mov</span><span class="w"> </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="no">length</span>
+<span class="na">rep</span><span class="w"> </span><span class="nf">stosb</span><span class="w">                </span><span class="c1">; Fill buffer with zeros</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="simd-instructions-mmxsseavx">SIMD Instructions (MMX/SSE/AVX)</h2>
+<h3 id="sse-example">SSE Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Working with 128-bit XMM registers</span>
+<span class="nf">movaps</span><span class="w"> </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esi</span><span class="p">]</span><span class="w">       </span><span class="c1">; Load 4 floats into XMM0</span>
+<span class="nf">movaps</span><span class="w"> </span><span class="no">xmm1</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">edi</span><span class="p">]</span><span class="w">       </span><span class="c1">; Load 4 floats into XMM1</span>
+<span class="nf">addps</span><span class="w"> </span><span class="no">xmm0</span><span class="p">,</span><span class="w"> </span><span class="no">xmm1</span><span class="w">         </span><span class="c1">; Add 4 floats in parallel</span>
+<span class="nf">movaps</span><span class="w"> </span><span class="p">[</span><span class="no">edx</span><span class="p">],</span><span class="w"> </span><span class="no">xmm0</span><span class="w">       </span><span class="c1">; Store result</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="avx-example">AVX Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">; Working with 256-bit YMM registers</span>
+<span class="nf">vmovaps</span><span class="w"> </span><span class="no">ymm0</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rsi</span><span class="p">]</span><span class="w">      </span><span class="c1">; Load 8 floats into YMM0</span>
+<span class="nf">vmovaps</span><span class="w"> </span><span class="no">ymm1</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">rdi</span><span class="p">]</span><span class="w">      </span><span class="c1">; Load 8 floats into YMM1</span>
+<span class="nf">vaddps</span><span class="w"> </span><span class="no">ymm0</span><span class="p">,</span><span class="w"> </span><span class="no">ymm0</span><span class="p">,</span><span class="w"> </span><span class="no">ymm1</span><span class="w">  </span><span class="c1">; Add 8 floats in parallel</span>
+<span class="nf">vmovaps</span><span class="w"> </span><span class="p">[</span><span class="no">rdx</span><span class="p">],</span><span class="w"> </span><span class="no">ymm0</span><span class="w">      </span><span class="c1">; Store result</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="practical-examples">Practical Examples</h2>
+<h3 id="example-1-simple-function">Example 1: Simple Function</h3>
+<p><strong>C Code:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">add_three_numbers</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>x86 Assembly:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">add_three_numbers:</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span>
+
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">8</span><span class="p">]</span><span class="w">     </span><span class="c1">; Load parameter a</span>
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">12</span><span class="p">]</span><span class="w">    </span><span class="c1">; Add parameter b</span>
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">16</span><span class="p">]</span><span class="w">    </span><span class="c1">; Add parameter c</span>
+
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>x64 Assembly (System V ABI):</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">add_three_numbers:</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">rbp</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">rbp</span><span class="p">,</span><span class="w"> </span><span class="no">rsp</span>
+
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">esi</span><span class="w">         </span><span class="c1">; a + b (first two parameters)</span>
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">edx</span><span class="w">         </span><span class="c1">; + c (third parameter)</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">edi</span><span class="w">         </span><span class="c1">; Return value</span>
+
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">rbp</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="example-2-array-iteration">Example 2: Array Iteration</h3>
+<p><strong>C Code:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">sum_array</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>x86 Assembly:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">sum_array:</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">edi</span>
+
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">esi</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">8</span><span class="p">]</span><span class="w">     </span><span class="c1">; arr pointer</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">ecx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">12</span><span class="p">]</span><span class="w">    </span><span class="c1">; size</span>
+<span class="w">    </span><span class="nf">xor</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span><span class="w">         </span><span class="c1">; sum = 0</span>
+<span class="w">    </span><span class="nf">xor</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">edi</span><span class="w">         </span><span class="c1">; i = 0</span>
+
+<span class="nl">loop_start:</span>
+<span class="w">    </span><span class="nf">cmp</span><span class="w"> </span><span class="no">edi</span><span class="p">,</span><span class="w"> </span><span class="no">ecx</span><span class="w">         </span><span class="c1">; Compare i with size</span>
+<span class="w">    </span><span class="nf">jge</span><span class="w"> </span><span class="no">loop_end</span><span class="w">         </span><span class="c1">; Jump if i &gt;= size</span>
+
+<span class="w">    </span><span class="nf">add</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">esi</span><span class="w"> </span><span class="err">+</span><span class="w"> </span><span class="no">edi</span><span class="p">*</span><span class="mi">4</span><span class="p">]</span><span class="w">  </span><span class="c1">; sum += arr[i]</span>
+<span class="w">    </span><span class="nf">inc</span><span class="w"> </span><span class="no">edi</span><span class="w">              </span><span class="c1">; i++</span>
+<span class="w">    </span><span class="nf">jmp</span><span class="w"> </span><span class="no">loop_start</span>
+
+<span class="nl">loop_end:</span>
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">edi</span>
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">esi</span>
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="example-3-string-length">Example 3: String Length</h3>
+<p><strong>C Code:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">my_strlen</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">str</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">len</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>x86 Assembly:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nl">my_strlen:</span>
+<span class="w">    </span><span class="nf">push</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">ebp</span><span class="p">,</span><span class="w"> </span><span class="no">esp</span>
+
+<span class="w">    </span><span class="nf">mov</span><span class="w"> </span><span class="no">edx</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="no">ebp</span><span class="err">+</span><span class="mi">8</span><span class="p">]</span><span class="w">     </span><span class="c1">; str pointer</span>
+<span class="w">    </span><span class="nf">xor</span><span class="w"> </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="no">eax</span><span class="w">         </span><span class="c1">; len = 0</span>
+
+<span class="nl">strlen_loop:</span>
+<span class="w">    </span><span class="nf">cmp</span><span class="w"> </span><span class="no">byte</span><span class="w"> </span><span class="no">ptr</span><span class="w"> </span><span class="p">[</span><span class="no">edx</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="c1">; Check if *str == 0</span>
+<span class="w">    </span><span class="nf">je</span><span class="w"> </span><span class="no">strlen_done</span><span class="w">         </span><span class="c1">; Jump if end of string</span>
+
+<span class="w">    </span><span class="nf">inc</span><span class="w"> </span><span class="no">eax</span><span class="w">              </span><span class="c1">; len++</span>
+<span class="w">    </span><span class="nf">inc</span><span class="w"> </span><span class="no">edx</span><span class="w">              </span><span class="c1">; str++</span>
+<span class="w">    </span><span class="nf">jmp</span><span class="w"> </span><span class="no">strlen_loop</span>
+
+<span class="nl">strlen_done:</span>
+<span class="w">    </span><span class="nf">pop</span><span class="w"> </span><span class="no">ebp</span>
+<span class="w">    </span><span class="nf">ret</span>
+</code></pre></div></td></tr></table></div></p>
+<h2 id="debugging-assembly">Debugging Assembly</h2>
+<h3 id="using-gdb">Using GDB</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile with debug info</span>
+gcc<span class="w"> </span>-g<span class="w"> </span>-O0<span class="w"> </span>program.c<span class="w"> </span>-o<span class="w"> </span>program
+
+<span class="c1"># Start debugging</span>
+gdb<span class="w"> </span>./program
+
+<span class="c1"># Useful GDB commands for assembly</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>disassemble<span class="w"> </span>main<span class="w">          </span><span class="c1"># Disassemble function</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>disassemble<span class="w"> </span>/m<span class="w"> </span>main<span class="w">       </span><span class="c1"># Mixed source/assembly</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>x/10i<span class="w"> </span><span class="nv">$pc</span><span class="w">                 </span><span class="c1"># Examine 10 instructions at PC</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>info<span class="w"> </span>registers<span class="w">            </span><span class="c1"># Show all registers</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>info<span class="w"> </span>registers<span class="w"> </span>eax<span class="w">        </span><span class="c1"># Show specific register</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>disassembly-flavor<span class="w"> </span>intel<span class="w">  </span><span class="c1"># Use Intel syntax</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>layout<span class="w"> </span>asm<span class="w">               </span><span class="c1"># Assembly view</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>stepi<span class="w">                    </span><span class="c1"># Step one instruction</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>nexti<span class="w">                    </span><span class="c1"># Next instruction (skip calls)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="objdump-analysis">Objdump Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Disassemble entire program</span>
+objdump<span class="w"> </span>-d<span class="w"> </span>program
+
+<span class="c1"># Disassemble specific section</span>
+objdump<span class="w"> </span>-d<span class="w"> </span>-j<span class="w"> </span>.text<span class="w"> </span>program
+
+<span class="c1"># Mixed source and assembly</span>
+objdump<span class="w"> </span>-S<span class="w"> </span>program
+
+<span class="c1"># Intel syntax</span>
+objdump<span class="w"> </span>-M<span class="w"> </span>intel<span class="w"> </span>-d<span class="w"> </span>program
+
+<span class="c1"># Show symbols</span>
+objdump<span class="w"> </span>-t<span class="w"> </span>program
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Assembly Fundamentals</p>
+<ul>
+<li><strong>Registers are fast</strong>: Understanding register usage is crucial</li>
+<li><strong>Stack grows down</strong>: ESP/RSP decreases when pushing</li>
+<li><strong>Calling conventions matter</strong>: Parameters passed differently in x86 vs x64</li>
+<li><strong>Addressing modes</strong>: Multiple ways to access memory</li>
+<li><strong>Flags affect control flow</strong>: CMP sets flags used by conditional jumps</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Reverse Engineering Tips</p>
+<ul>
+<li>Learn to recognize common patterns (function prologue/epilogue)</li>
+<li>Understand the relationship between C constructs and assembly</li>
+<li>Practice reading both optimized and unoptimized code</li>
+<li>Familiarize yourself with both Intel and AT&amp;T syntax</li>
+<li>Use debugging tools to step through assembly execution</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../04-memory/">Memory Management</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

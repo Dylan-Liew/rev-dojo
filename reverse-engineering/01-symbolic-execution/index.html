@@ -1,0 +1,1835 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/01-symbolic-execution/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Symbolic Execution with Z3 and angr - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#symbolic-execution-with-z3-and-angr" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Symbolic Execution with Z3 and angr
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-symbolic-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Symbolic Execution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Symbolic Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-symbolic-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is Symbolic Execution?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Concepts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#z3-solver-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Z3 Solver Fundamentals
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Z3 Solver Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-and-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#z3-data-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Z3 Data Types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solving-simple-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solving Simple Constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bit-vector-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bit-Vector Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#angr-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      angr Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="angr Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-and-basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Basic Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#program-analysis-with-angr" class="md-nav__link">
+    <span class="md-ellipsis">
+      Program Analysis with angr
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#symbolic-input-and-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symbolic Input and Constraints
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Applications
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Applications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vulnerability-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vulnerability Discovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-exploit-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic Exploit Generation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-solving-for-reverse-engineering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint Solving for Reverse Engineering
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#state-merging-and-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      State Merging and Exploration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-model-manipulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Model Manipulation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gdb-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      GDB Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-analysis-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Analysis Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="symbolic-execution-with-z3-and-angr">Symbolic Execution with Z3 and angr</h1>
+<p>Symbolic execution is a powerful technique for analyzing programs by treating inputs as symbolic variables rather than concrete values. This allows exploration of multiple execution paths simultaneously and can help discover vulnerabilities, generate test cases, and solve complex constraints.</p>
+<h2 id="understanding-symbolic-execution">Understanding Symbolic Execution</h2>
+<h3 id="what-is-symbolic-execution">What is Symbolic Execution?</h3>
+<p>Symbolic execution involves:
+1. <strong>Symbolic variables</strong> - Inputs represented as mathematical symbols
+2. <strong>Path constraints</strong> - Conditions that must be satisfied for each execution path
+3. <strong>Constraint solving</strong> - Using SMT solvers to find concrete values
+4. <strong>Path exploration</strong> - Systematically exploring different program paths</p>
+<h3 id="key-concepts">Key Concepts</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code>Program State:
+┌─────────────────────┐
+│ Symbolic Variables  │ α, β, γ (unknown values)
+├─────────────────────┤
+│ Path Constraints    │ α &gt; 0, β &lt; 100, α + β = γ
+├─────────────────────┤
+│ Program Counter     │ Current execution location
+└─────────────────────┘
+</code></pre></div></td></tr></table></div>
+<h2 id="z3-solver-fundamentals">Z3 Solver Fundamentals</h2>
+<h3 id="installation-and-setup">Installation and Setup</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Install Z3</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">z3</span><span class="o">-</span><span class="n">solver</span>
+
+<span class="c1"># Basic Z3 usage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">z3</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Create solver instance</span>
+<span class="n">solver</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+
+<span class="c1"># Create symbolic variables</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add constraints</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># Check satisfiability</span>
+<span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">()</span> <span class="o">==</span> <span class="n">sat</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x = </span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="si">}</span><span class="s2">, y = </span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="z3-data-types">Z3 Data Types</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">z3</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Integer variables</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+<span class="c1"># Bit-vector variables (for binary analysis)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">BitVec</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>  <span class="c1"># 32-bit variable</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">BitVec</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>  <span class="c1"># 64-bit variable</span>
+
+<span class="c1"># Boolean variables</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="s1">&#39;flag&#39;</span><span class="p">)</span>
+
+<span class="c1"># Arrays (for memory modeling)</span>
+<span class="n">mem</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s1">&#39;mem&#39;</span><span class="p">,</span> <span class="n">BitVecSort</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="n">BitVecSort</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>  <span class="c1"># Address -&gt; Byte mapping</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="solving-simple-constraints">Solving Simple Constraints</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">z3</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">solve_basic_equation</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve: 2x + 3y = 20, x &gt; 0, y &gt; 0&quot;&quot;&quot;</span>
+
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+
+    <span class="c1"># Variables</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Constraints</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">y</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Solve</span>
+    <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">()</span> <span class="o">==</span> <span class="n">sat</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Solution: x = </span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="si">}</span><span class="s2">, y = </span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Find all solutions</span>
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">()</span> <span class="o">==</span> <span class="n">sat</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">(),</span> <span class="n">m</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">()))</span>
+
+            <span class="c1"># Block this solution</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Or</span><span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">m</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">y</span> <span class="o">!=</span> <span class="n">m</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All solutions: </span><span class="si">{</span><span class="n">solutions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No solution found&quot;</span><span class="p">)</span>
+
+<span class="n">solve_basic_equation</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="bit-vector-operations">Bit-Vector Operations</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">z3</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bitvector_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze bit-vector operations&quot;&quot;&quot;</span>
+
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">Solver</span><span class="p">()</span>
+
+    <span class="c1"># 32-bit variables</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">BitVec</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">BitVec</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+
+    <span class="c1"># Bit operations</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">&amp;</span> <span class="n">y</span> <span class="o">==</span> <span class="mh">0x12345678</span><span class="p">)</span>  <span class="c1"># AND</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">|</span> <span class="n">y</span> <span class="o">==</span> <span class="mh">0xabcdef00</span><span class="p">)</span>  <span class="c1"># OR</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">^</span> <span class="n">y</span> <span class="o">==</span> <span class="mh">0x99999988</span><span class="p">)</span>  <span class="c1"># XOR</span>
+
+    <span class="c1"># Arithmetic</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="mh">0xdeadbeef</span><span class="p">)</span>
+
+    <span class="c1"># Shifts</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span> <span class="o">==</span> <span class="n">y</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">check</span><span class="p">()</span> <span class="o">==</span> <span class="n">sat</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x = 0x</span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">()</span><span class="si">:</span><span class="s2">08x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;y = 0x</span><span class="si">{</span><span class="n">model</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">()</span><span class="si">:</span><span class="s2">08x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">bitvector_analysis</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="angr-framework">angr Framework</h2>
+<h3 id="installation-and-basic-usage">Installation and Basic Usage</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Install angr</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">angr</span>
+
+<span class="c1"># Basic angr script</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">basic_angr_analysis</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+    <span class="c1"># Create project</span>
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Create initial state</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+    <span class="c1"># Create simulation manager</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Explore until main function</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">main_object</span><span class="o">.</span><span class="n">get_symbol</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rebased_addr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2"> paths to main&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not reach main&quot;</span><span class="p">)</span>
+
+<span class="c1"># Usage</span>
+<span class="n">basic_angr_analysis</span><span class="p">(</span><span class="s1">&#39;./target_binary&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="program-analysis-with-angr">Program Analysis with angr</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_simple_crackme</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze a simple password checking program&quot;&quot;&quot;</span>
+
+    <span class="c1"># Load binary</span>
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Find addresses of interest</span>
+    <span class="c1"># Assume we want to reach a &quot;success&quot; message</span>
+    <span class="n">success_addr</span> <span class="o">=</span> <span class="mh">0x401234</span>  <span class="c1"># Address of success branch</span>
+    <span class="n">failure_addr</span> <span class="o">=</span> <span class="mh">0x401250</span>  <span class="c1"># Address of failure branch</span>
+
+    <span class="c1"># Create symbolic state at program entry</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+    <span class="c1"># Create simulation manager</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Explore paths</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">success_addr</span><span class="p">,</span> <span class="n">avoid</span><span class="o">=</span><span class="n">failure_addr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">:</span>
+        <span class="c1"># Found a path to success</span>
+        <span class="n">found_state</span> <span class="o">=</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Extract input that leads to success</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">found_state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># stdin input</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found solution: </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">flag</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No solution found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="n">analyze_simple_crackme</span><span class="p">(</span><span class="s1">&#39;./crackme&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="symbolic-input-and-constraints">Symbolic Input and Constraints</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">symbolic_input_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create symbolic input and analyze program behavior&quot;&quot;&quot;</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Create symbolic input</span>
+    <span class="n">flag_length</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">flag_chars</span> <span class="o">=</span> <span class="p">[</span><span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;flag_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">flag_length</span><span class="p">)]</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">Concat</span><span class="p">(</span><span class="o">*</span><span class="n">flag_chars</span><span class="p">)</span>
+
+    <span class="c1"># Constrain input to printable ASCII</span>
+    <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">flag_chars</span><span class="p">:</span>
+        <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span> <span class="o">&gt;=</span> <span class="mh">0x20</span><span class="p">)</span>  <span class="c1"># Printable ASCII</span>
+        <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span> <span class="o">&lt;=</span> <span class="mh">0x7e</span><span class="p">)</span>
+
+    <span class="c1"># Create state with symbolic stdin</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">(</span><span class="n">stdin</span><span class="o">=</span><span class="n">flag</span><span class="p">)</span>
+
+    <span class="c1"># Add constraints</span>
+    <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+
+    <span class="c1"># Simulation</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Define success condition</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_successful</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># stdout</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;Correct!&#39;</span> <span class="ow">in</span> <span class="n">output</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">should_abort</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">posix</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;Wrong!&#39;</span> <span class="ow">in</span> <span class="n">output</span>
+
+    <span class="c1"># Explore with custom conditions</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">is_successful</span><span class="p">,</span> <span class="n">avoid</span><span class="o">=</span><span class="n">should_abort</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">:</span>
+        <span class="n">solution_state</span> <span class="o">=</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">solution_state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">cast_to</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Solution: </span><span class="si">{</span><span class="n">solution</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">symbolic_input_analysis</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="practical-applications">Practical Applications</h2>
+<h3 id="vulnerability-discovery">Vulnerability Discovery</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_buffer_overflow</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect potential buffer overflow vulnerabilities&quot;&quot;&quot;</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">)</span>
+
+    <span class="c1"># Create state with symbolic input</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+    <span class="c1"># Hook dangerous functions</span>
+    <span class="n">dangerous_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;strcpy&#39;</span><span class="p">,</span> <span class="s1">&#39;gets&#39;</span><span class="p">,</span> <span class="s1">&#39;sprintf&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">dangerous_functions</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">func_addr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">find_symbol</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span><span class="o">.</span><span class="n">rebased_addr</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">check_overflow</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+                <span class="c1"># Check if we can control return address</span>
+                <span class="n">rsp</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsp</span>
+                <span class="n">ret_addr</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">rsp</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">ret_addr</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Potential buffer overflow in </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can control return address: </span><span class="si">{</span><span class="n">ret_addr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># Try to solve for specific value</span>
+                    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">satisfiable</span><span class="p">(</span><span class="n">extra_constraints</span><span class="o">=</span><span class="p">[</span><span class="n">ret_addr</span> <span class="o">==</span> <span class="mh">0x4141414141414141</span><span class="p">]):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Return address is controllable!&quot;</span><span class="p">)</span>
+
+            <span class="n">proj</span><span class="o">.</span><span class="n">hook</span><span class="p">(</span><span class="n">func_addr</span><span class="p">,</span> <span class="n">check_overflow</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># Function not found</span>
+
+    <span class="c1"># Simulate execution</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="n">find_buffer_overflow</span><span class="p">(</span><span class="s1">&#39;./vulnerable_program&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="automatic-exploit-generation">Automatic Exploit Generation</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_rop_chain</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically generate ROP chain&quot;&quot;&quot;</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">)</span>
+
+    <span class="c1"># Find ROP gadgets</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">CFGFast</span><span class="p">()</span>
+    <span class="n">rop</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">ROP</span><span class="p">()</span>
+
+    <span class="c1"># Search for useful gadgets</span>
+    <span class="n">pop_rdi</span> <span class="o">=</span> <span class="n">rop</span><span class="o">.</span><span class="n">find_gadgets_with_only_insns</span><span class="p">([</span><span class="s1">&#39;pop rdi&#39;</span><span class="p">,</span> <span class="s1">&#39;ret&#39;</span><span class="p">])</span>
+    <span class="n">pop_rsi</span> <span class="o">=</span> <span class="n">rop</span><span class="o">.</span><span class="n">find_gadgets_with_only_insns</span><span class="p">([</span><span class="s1">&#39;pop rsi&#39;</span><span class="p">,</span> <span class="s1">&#39;ret&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">pop_rdi</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found &#39;pop rdi; ret&#39; at: 0x</span><span class="si">{</span><span class="n">pop_rdi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">addr</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pop_rsi</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found &#39;pop rsi; ret&#39; at: 0x</span><span class="si">{</span><span class="n">pop_rsi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">addr</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Find system() and &quot;/bin/sh&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">system_addr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">find_symbol</span><span class="p">(</span><span class="s1">&#39;system&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rebased_addr</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;system() at: 0x</span><span class="si">{</span><span class="n">system_addr</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;system() not found&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Search for &quot;/bin/sh&quot; string</span>
+    <span class="n">binsh_addr</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">addr</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">backers</span><span class="p">():</span>
+        <span class="k">if</span> <span class="sa">b</span><span class="s1">&#39;/bin/sh&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">binsh_addr</span> <span class="o">=</span> <span class="n">addr</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;/bin/sh&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/bin/sh at: 0x</span><span class="si">{</span><span class="n">binsh_addr</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+<span class="n">generate_rop_chain</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="constraint-solving-for-reverse-engineering">Constraint Solving for Reverse Engineering</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">solve_hash_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reverse a custom hash function to find input&quot;&quot;&quot;</span>
+
+    <span class="c1"># Simulate the hash function symbolically</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">custom_hash</span><span class="p">(</span><span class="n">input_val</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Example hash function: ((x * 31) + 17) ^ 0xdeadbeef&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">input_val</span> <span class="o">*</span> <span class="mi">31</span><span class="p">)</span> <span class="o">+</span> <span class="mi">17</span><span class="p">)</span> <span class="o">^</span> <span class="mh">0xdeadbeef</span>
+
+    <span class="c1"># Create symbolic variable</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+
+    <span class="c1"># Target hash value</span>
+    <span class="n">target_hash</span> <span class="o">=</span> <span class="mh">0x12345678</span>
+
+    <span class="c1"># Create constraint</span>
+    <span class="n">constraint</span> <span class="o">=</span> <span class="n">custom_hash</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">target_hash</span>
+
+    <span class="c1"># Solve</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">Solver</span><span class="p">()</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">solver</span><span class="o">.</span><span class="n">satisfiable</span><span class="p">():</span>
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input that produces hash 0x</span><span class="si">{</span><span class="n">target_hash</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">: 0x</span><span class="si">{</span><span class="n">solution</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Verify</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">custom_hash</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Verification: custom_hash(0x</span><span class="si">{</span><span class="n">solution</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">) = 0x</span><span class="si">{</span><span class="n">result</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No solution found&quot;</span><span class="p">)</span>
+
+<span class="n">solve_hash_function</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="advanced-techniques">Advanced Techniques</h2>
+<h3 id="state-merging-and-exploration">State Merging and Exploration</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">advanced_exploration</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Advanced state exploration techniques&quot;&quot;&quot;</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">)</span>
+
+    <span class="c1"># Custom exploration strategy</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Exploration with depth limit</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s1">&#39;target_function&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">addr</span><span class="p">),</span> 
+                 <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># Limit exploration steps</span>
+
+    <span class="c1"># State merging for efficiency</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">use_technique</span><span class="p">(</span><span class="n">angr</span><span class="o">.</span><span class="n">exploration_techniques</span><span class="o">.</span><span class="n">Veritesting</span><span class="p">())</span>
+
+    <span class="c1"># Memory-efficient exploration</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">use_technique</span><span class="p">(</span><span class="n">angr</span><span class="o">.</span><span class="n">exploration_techniques</span><span class="o">.</span><span class="n">Spiller</span><span class="p">())</span>
+
+    <span class="c1"># Custom stash management</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interesting_state</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+        <span class="c1"># Only keep states that call specific functions</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;malloc&#39;</span> <span class="k">for</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>
+
+    <span class="n">simgr</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">from_stash</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span> <span class="n">to_stash</span><span class="o">=</span><span class="s1">&#39;interesting&#39;</span><span class="p">,</span> 
+              <span class="n">filter_func</span><span class="o">=</span><span class="n">interesting_state</span><span class="p">)</span>
+
+<span class="n">advanced_exploration</span><span class="p">(</span><span class="s1">&#39;./complex_binary&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="memory-model-manipulation">Memory Model Manipulation</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">claripy</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">memory_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze memory access patterns&quot;&quot;&quot;</span>
+
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+
+    <span class="c1"># Create symbolic memory</span>
+    <span class="n">symbolic_addr</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;addr&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+    <span class="n">symbolic_data</span> <span class="o">=</span> <span class="n">claripy</span><span class="o">.</span><span class="n">BVS</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+
+    <span class="c1"># Constrain address to valid range</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbolic_addr</span> <span class="o">&gt;=</span> <span class="mh">0x400000</span><span class="p">)</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbolic_addr</span> <span class="o">&lt;</span> <span class="mh">0x500000</span><span class="p">)</span>
+
+    <span class="c1"># Write symbolic data to symbolic address</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">symbolic_addr</span><span class="p">,</span> <span class="n">symbolic_data</span><span class="p">)</span>
+
+    <span class="c1"># Read back and analyze</span>
+    <span class="n">read_data</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">symbolic_addr</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Check if read equals write</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">satisfiable</span><span class="p">(</span><span class="n">extra_constraints</span><span class="o">=</span><span class="p">[</span><span class="n">read_data</span> <span class="o">==</span> <span class="n">symbolic_data</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Memory model is consistent&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Find specific memory corruption</span>
+    <span class="n">corruption_constraint</span> <span class="o">=</span> <span class="n">symbolic_addr</span> <span class="o">==</span> <span class="mh">0x41414141</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">satisfiable</span><span class="p">(</span><span class="n">extra_constraints</span><span class="o">=</span><span class="p">[</span><span class="n">corruption_constraint</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can write to controlled address!&quot;</span><span class="p">)</span>
+
+<span class="n">memory_analysis</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="tool-integration">Tool Integration</h2>
+<h3 id="gdb-integration">GDB Integration</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">angr_gdb_integration</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">breakpoint_addr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine angr analysis with GDB debugging&quot;&quot;&quot;</span>
+
+    <span class="c1"># Angr analysis first</span>
+    <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+    <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+    <span class="c1"># Find path to specific address</span>
+    <span class="n">simgr</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">find</span><span class="o">=</span><span class="n">breakpoint_addr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">:</span>
+        <span class="n">found_state</span> <span class="o">=</span> <span class="n">simgr</span><span class="o">.</span><span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Extract register state</span>
+        <span class="n">registers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;rax&#39;</span><span class="p">:</span> <span class="n">found_state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rax</span><span class="p">,</span>
+            <span class="s1">&#39;rbx&#39;</span><span class="p">:</span> <span class="n">found_state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rbx</span><span class="p">,</span>
+            <span class="s1">&#39;rcx&#39;</span><span class="p">:</span> <span class="n">found_state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rcx</span><span class="p">,</span>
+            <span class="s1">&#39;rdx&#39;</span><span class="p">:</span> <span class="n">found_state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rdx</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Generate GDB script</span>
+        <span class="n">gdb_script</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        file </span><span class="si">{</span><span class="n">binary_path</span><span class="si">}</span>
+<span class="s2">        break *</span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">breakpoint_addr</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">        run</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">reg</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">registers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">found_state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+                <span class="c1"># If symbolic, find a concrete value</span>
+                <span class="n">concrete_val</span> <span class="o">=</span> <span class="n">found_state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">gdb_script</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;set $</span><span class="si">{</span><span class="n">reg</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">concrete_val</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Write GDB script</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;angr_gdb.gdb&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gdb_script</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generated GDB script: angr_gdb.gdb&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run with: gdb -x angr_gdb.gdb&quot;</span><span class="p">)</span>
+
+<span class="n">angr_gdb_integration</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">,</span> <span class="mh">0x401234</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="automated-analysis-pipeline">Automated Analysis Pipeline</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">angr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">automated_analysis_pipeline</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete automated analysis pipeline&quot;&quot;&quot;</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;binary&#39;</span><span class="p">:</span> <span class="n">binary_path</span><span class="p">,</span>
+        <span class="s1">&#39;vulnerabilities&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;interesting_functions&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;gadgets&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;strings&#39;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load binary</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">angr</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">auto_load_libs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># CFG analysis</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">CFGFast</span><span class="p">()</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;functions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">functions</span><span class="p">)</span>
+
+        <span class="c1"># Find interesting functions</span>
+        <span class="n">dangerous_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;strcpy&#39;</span><span class="p">,</span> <span class="s1">&#39;gets&#39;</span><span class="p">,</span> <span class="s1">&#39;sprintf&#39;</span><span class="p">,</span> <span class="s1">&#39;scanf&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">dangerous_funcs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">find_symbol</span><span class="p">(</span><span class="n">func_name</span><span class="p">):</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;interesting_functions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+
+        <span class="c1"># ROP gadget analysis</span>
+        <span class="n">rop</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">analyses</span><span class="o">.</span><span class="n">ROP</span><span class="p">()</span>
+        <span class="n">gadgets</span> <span class="o">=</span> <span class="n">rop</span><span class="o">.</span><span class="n">find_gadgets_with_only_insns</span><span class="p">([</span><span class="s1">&#39;pop rdi&#39;</span><span class="p">,</span> <span class="s1">&#39;ret&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">gadgets</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;gadgets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="nb">hex</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">addr</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gadgets</span><span class="p">[:</span><span class="mi">5</span><span class="p">]])</span>
+
+        <span class="c1"># String analysis</span>
+        <span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">addr</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">proj</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">backers</span><span class="p">():</span>
+            <span class="c1"># Find printable strings</span>
+            <span class="n">current_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="mi">32</span> <span class="o">&lt;=</span> <span class="n">byte</span> <span class="o">&lt;=</span> <span class="mi">126</span><span class="p">:</span>  <span class="c1"># Printable ASCII</span>
+                    <span class="n">current_string</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">byte</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_string</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_string</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+                    <span class="n">current_string</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;strings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strings</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>  <span class="c1"># First 10 strings</span>
+
+        <span class="c1"># Vulnerability detection</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">entry_state</span><span class="p">()</span>
+        <span class="n">simgr</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">simulation_manager</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+        <span class="c1"># Look for potential overflows</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>  <span class="c1"># Limited exploration</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">simgr</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">simgr</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">simgr</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="c1"># Check for symbolic return address</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rsp</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">regs</span><span class="o">.</span><span class="n">rsp</span>
+                    <span class="n">ret_addr</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">rsp</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">ret_addr</span><span class="p">):</span>
+                        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;vulnerabilities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;potential_buffer_overflow&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;address&#39;</span><span class="p">:</span> <span class="nb">hex</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">addr</span><span class="p">)</span>
+                        <span class="p">})</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="c1"># Save results</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">binary_path</span><span class="p">)</span><span class="si">}</span><span class="s2">_analysis.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Analysis complete. Results saved to </span><span class="si">{</span><span class="n">output_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+
+<span class="c1"># Usage</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">automated_analysis_pipeline</span><span class="p">(</span><span class="s1">&#39;./target_binary&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Symbolic Execution Fundamentals</p>
+<ul>
+<li><strong>Symbolic variables</strong> represent unknown inputs as mathematical symbols</li>
+<li><strong>Path exploration</strong> allows analysis of multiple execution paths</li>
+<li><strong>Constraint solving</strong> finds concrete values satisfying conditions</li>
+<li><strong>Z3 solver</strong> provides powerful SMT solving capabilities</li>
+<li><strong>angr framework</strong> enables comprehensive binary analysis</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Limitations and Challenges</p>
+<ul>
+<li>Path explosion can make analysis intractable</li>
+<li>Complex constraints may be unsolvable</li>
+<li>Memory models have limitations</li>
+<li>Real-world binaries may require significant setup</li>
+<li>Performance can be slow for large programs</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Best Practices</p>
+<ul>
+<li>Start with simple examples to understand concepts</li>
+<li>Use exploration limits to prevent path explosion</li>
+<li>Combine with other analysis techniques</li>
+<li>Validate results with dynamic analysis</li>
+<li>Consider memory and time constraints</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../../binary-exploitation/fundamentals/01-pwntools/">Binary Exploitation Fundamentals</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

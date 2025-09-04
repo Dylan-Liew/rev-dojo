@@ -1,0 +1,2510 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/dynamic/02-debugging/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Debugging Techniques - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#debugging-techniques" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Debugging Techniques
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-gdb-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced GDB Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced GDB Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conditional-breakpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional Breakpoints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#watchpoints-and-memory-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Watchpoints and Memory Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-memory-examination" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Memory Examination
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-analysis-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Analysis Strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dynamic Analysis Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-call-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Call Tracing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-flow-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-threaded-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-threaded Debugging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-threaded Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#thread-specific-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thread-specific Debugging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#race-condition-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Race Condition Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#heap-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Heap Debugging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Heap Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heap-corruption-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Heap Corruption Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-debugging-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Debugging Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Debugging Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-taint-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Taint Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-profiling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Profiling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reverse-engineering-specific-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reverse Engineering Specific Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reverse Engineering Specific Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anti-debugging-bypass" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anti-debugging Bypass
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automation-and-scripting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automation and Scripting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automation and Scripting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-vulnerability-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Vulnerability Discovery
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="debugging-techniques">Debugging Techniques</h1>
+<p>Advanced debugging techniques are essential for understanding program behavior, finding vulnerabilities, and developing exploits. This section covers sophisticated debugging strategies and methodologies.</p>
+<h2 id="advanced-gdb-techniques">Advanced GDB Techniques</h2>
+<h3 id="conditional-breakpoints">Conditional Breakpoints</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Break only when specific conditions are met</span>
+<span class="k">break</span><span class="w"> </span>main<span class="w"> </span><span class="k">if</span><span class="w"> </span>argc<span class="w"> </span>&gt;<span class="w"> </span><span class="m">2</span>
+<span class="k">break</span><span class="w"> </span>malloc<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">$rdi</span><span class="w"> </span>&gt;<span class="w"> </span><span class="m">1000</span>
+<span class="k">break</span><span class="w"> </span>strcpy<span class="w"> </span><span class="k">if</span><span class="w"> </span>strcmp<span class="o">(</span><span class="nv">$rsi</span>,<span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="o">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">0</span>
+
+<span class="c1"># Complex conditions</span>
+<span class="k">break</span><span class="w"> </span>*0x400123<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">$rax</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>0x41414141<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$rbx</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="m">0</span>
+
+<span class="c1"># Break on memory access patterns</span>
+<span class="k">break</span><span class="w"> </span>*0x400456<span class="w"> </span><span class="k">if</span><span class="w"> </span>*<span class="o">((</span>int*<span class="o">)</span><span class="nv">$rsp</span><span class="o">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>0x12345678
+
+<span class="c1"># Break after N hits</span>
+<span class="k">break</span><span class="w"> </span>main
+ignore<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">10</span><span class="w">  </span><span class="c1"># Ignore first 10 hits</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="watchpoints-and-memory-monitoring">Watchpoints and Memory Monitoring</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Watch memory locations</span>
+watch<span class="w"> </span>*0x601040<span class="w">                    </span><span class="c1"># Break when value changes</span>
+watch<span class="w"> </span>*<span class="o">(</span>int*<span class="o">)(</span><span class="nv">$rsp</span>+8<span class="o">)</span><span class="w">             </span><span class="c1"># Watch stack location</span>
+rwatch<span class="w"> </span>*0x601040<span class="w">                  </span><span class="c1"># Break on read access</span>
+awatch<span class="w"> </span>*0x601040<span class="w">                  </span><span class="c1"># Break on any access</span>
+
+<span class="c1"># Watch expressions</span>
+watch<span class="w"> </span>global_variable
+watch<span class="w"> </span>my_struct.field
+watch<span class="w"> </span>array<span class="o">[</span>index<span class="o">]</span>
+
+<span class="c1"># Hardware watchpoints (limited number)</span>
+hbreak<span class="w"> </span>*0x400123<span class="w">                  </span><span class="c1"># Hardware breakpoint</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="advanced-memory-examination">Advanced Memory Examination</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Examine memory with different formats</span>
+x/20x<span class="w"> </span><span class="nv">$rsp</span><span class="w">                        </span><span class="c1"># 20 hex words</span>
+x/10i<span class="w"> </span><span class="nv">$rip</span><span class="w">                        </span><span class="c1"># 10 instructions</span>
+x/s<span class="w"> </span><span class="nv">$rdi</span><span class="w">                          </span><span class="c1"># String at RDI</span>
+x/20c<span class="w"> </span><span class="nv">$rsi</span><span class="w">                        </span><span class="c1"># 20 characters</span>
+
+<span class="c1"># Memory dumps with context</span>
+define<span class="w"> </span>dump_stack
+<span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;Stack dump around RSP:\n&quot;</span>
+<span class="w">    </span>x/20gx<span class="w"> </span><span class="nv">$rsp</span>-40
+end
+
+<span class="c1"># Compare memory regions</span>
+define<span class="w"> </span>compare_memory
+<span class="w">    </span><span class="nb">set</span><span class="w"> </span><span class="nv">$addr1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$arg0</span>
+<span class="w">    </span><span class="nb">set</span><span class="w"> </span><span class="nv">$addr2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$arg1</span>
+<span class="w">    </span><span class="nb">set</span><span class="w"> </span><span class="nv">$size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$arg2</span>
+
+<span class="w">    </span><span class="nb">set</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span>&lt;<span class="w"> </span><span class="nv">$size</span>
+<span class="w">        </span><span class="nb">set</span><span class="w"> </span><span class="nv">$val1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>*<span class="o">((</span>char*<span class="o">)</span><span class="nv">$addr1</span><span class="w"> </span>+<span class="w"> </span><span class="nv">$i</span><span class="o">)</span>
+<span class="w">        </span><span class="nb">set</span><span class="w"> </span><span class="nv">$val2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>*<span class="o">((</span>char*<span class="o">)</span><span class="nv">$addr2</span><span class="w"> </span>+<span class="w"> </span><span class="nv">$i</span><span class="o">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nv">$val1</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="nv">$val2</span>
+<span class="w">            </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;Diff at offset %d: 0x%02x vs 0x%02x\n&quot;</span>,<span class="w"> </span><span class="nv">$i</span>,<span class="w"> </span><span class="nv">$val1</span>,<span class="w"> </span><span class="nv">$val2</span>
+<span class="w">        </span>end
+<span class="w">        </span><span class="nb">set</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">$i</span><span class="w"> </span>+<span class="w"> </span><span class="m">1</span>
+<span class="w">    </span>end
+end
+</code></pre></div></td></tr></table></div>
+<h2 id="dynamic-analysis-strategies">Dynamic Analysis Strategies</h2>
+<h3 id="function-call-tracing">Function Call Tracing</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pwn</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">trace_function_calls</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace all function calls in a program&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    set pagination off</span>
+<span class="s1">    set logging file trace.log</span>
+<span class="s1">    set logging on</span>
+
+<span class="s1">    # Break on all function calls</span>
+<span class="s1">    catch syscall</span>
+
+<span class="s1">    # Custom tracer for function entries</span>
+<span class="s1">    define trace_call</span>
+<span class="s1">        printf &quot;CALL: </span><span class="si">%s</span><span class="s1"> at %p</span><span class="se">\\</span><span class="s1">n&quot;, $arg0, $rip</span>
+<span class="s1">        printf &quot;  Args: RDI=%p RSI=%p RDX=%p</span><span class="se">\\</span><span class="s1">n&quot;, $rdi, $rsi, $rdx</span>
+<span class="s1">        backtrace 3</span>
+<span class="s1">        printf &quot;</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Hook common functions</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        trace_call &quot;malloc&quot;</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break free</span>
+<span class="s1">    commands</span>
+<span class="s1">        trace_call &quot;free&quot;</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break strcpy</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;strcpy(dest=%p, src=</span><span class="se">\\</span><span class="s1">&quot;</span><span class="si">%s</span><span class="se">\\</span><span class="s1">&quot;)</span><span class="se">\\</span><span class="s1">n&quot;, $rdi, $rsi</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    run</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">,</span> <span class="n">gdb_script</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">automated_function_discovery</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically discover and trace interesting functions&quot;&quot;&quot;</span>
+
+    <span class="n">elf</span> <span class="o">=</span> <span class="n">ELF</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">)</span>
+    <span class="n">functions_to_trace</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Find functions with interesting names</span>
+    <span class="n">interesting_patterns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="s1">&#39;crypt&#39;</span><span class="p">,</span> <span class="s1">&#39;hash&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;validate&#39;</span><span class="p">,</span> <span class="s1">&#39;check&#39;</span><span class="p">,</span> <span class="s1">&#39;verify&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;token&#39;</span><span class="p">,</span> <span class="s1">&#39;secret&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">elf</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">interesting_patterns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">symbol</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">functions_to_trace</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">addr</span><span class="p">))</span>
+
+    <span class="c1"># Generate GDB script to trace these functions</span>
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;set pagination off</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">for</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">func_addr</span> <span class="ow">in</span> <span class="n">functions_to_trace</span><span class="p">:</span>
+        <span class="n">gdb_script</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">break *</span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">func_addr</span><span class="p">)</span><span class="si">}</span>
+<span class="s1">commands</span>
+<span class="s1">    printf &quot;&gt;&gt;&gt; </span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s1"> called at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rip</span>
+<span class="s1">    printf &quot;    Args: %p %p %p %p</span><span class="se">\\</span><span class="s1">n&quot;, $rdi, $rsi, $rdx, $rcx</span>
+<span class="s1">    continue</span>
+<span class="s1">end</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+    <span class="n">gdb_script</span> <span class="o">+=</span> <span class="s1">&#39;run</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="data-flow-analysis">Data Flow Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">trace_data_flow</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace how data flows through the program&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Track a specific value through execution</span>
+<span class="s1">    set $target_value = 0x41414141</span>
+<span class="s1">    set $trace_active = 0</span>
+
+<span class="s1">    define check_registers</span>
+<span class="s1">        if $rax == $target_value</span>
+<span class="s1">            printf &quot;Target value found in RAX at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rip</span>
+<span class="s1">            set $trace_active = 1</span>
+<span class="s1">        end</span>
+<span class="s1">        if $rbx == $target_value</span>
+<span class="s1">            printf &quot;Target value found in RBX at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rip  </span>
+<span class="s1">            set $trace_active = 1</span>
+<span class="s1">        end</span>
+<span class="s1">        # Check other registers...</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Hook every instruction when tracing is active</span>
+<span class="s1">    define trace_instruction</span>
+<span class="s1">        if $trace_active</span>
+<span class="s1">            printf &quot;TRACE: %p &quot;, $rip</span>
+<span class="s1">            x/i $rip</span>
+<span class="s1">            check_registers</span>
+<span class="s1">        end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Enable single-step tracing</span>
+<span class="s1">    break main</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;Starting data flow trace for value 0x</span><span class="si">%x</span><span class="se">\\</span><span class="s1">n&quot;, $target_value</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">memory_corruption_detector</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect memory corruption in real-time&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Set up corruption detection</span>
+<span class="s1">    set $canary_value = 0xdeadbeefcafebabe</span>
+<span class="s1">    set $canary_addr = 0</span>
+
+<span class="s1">    # Hook malloc to set up canaries</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        finish</span>
+<span class="s1">        set $canary_addr = $rax + $arg0</span>
+<span class="s1">        set *((long*)$canary_addr) = $canary_value</span>
+<span class="s1">        printf &quot;Canary set at %p (after </span><span class="si">%d</span><span class="s1"> bytes)</span><span class="se">\\</span><span class="s1">n&quot;, $canary_addr, $arg0</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Check canaries periodically</span>
+<span class="s1">    break strcpy</span>
+<span class="s1">    commands</span>
+<span class="s1">        if $canary_addr != 0</span>
+<span class="s1">            if *((long*)$canary_addr) != $canary_value</span>
+<span class="s1">                printf &quot;CORRUPTION DETECTED! Canary overwritten</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">                printf &quot;Expected: 0x</span><span class="si">%lx</span><span class="s1">, Found: 0x</span><span class="si">%lx</span><span class="se">\\</span><span class="s1">n&quot;, $canary_value, *((long*)$canary_addr)</span>
+<span class="s1">                backtrace</span>
+<span class="s1">            end</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="multi-threaded-debugging">Multi-threaded Debugging</h2>
+<h3 id="thread-specific-debugging">Thread-specific Debugging</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># List all threads</span>
+info<span class="w"> </span>threads
+
+<span class="c1"># Switch between threads</span>
+thread<span class="w"> </span><span class="m">2</span>
+thread<span class="w"> </span>apply<span class="w"> </span>all<span class="w"> </span>bt<span class="w">    </span><span class="c1"># Backtrace all threads</span>
+
+<span class="c1"># Thread-specific breakpoints</span>
+<span class="k">break</span><span class="w"> </span>thread_function<span class="w"> </span>thread<span class="w"> </span><span class="m">3</span>
+<span class="k">break</span><span class="w"> </span>main<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">$_thread</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">2</span>
+
+<span class="c1"># Lock scheduler to current thread</span>
+<span class="nb">set</span><span class="w"> </span>scheduler-locking<span class="w"> </span>on
+
+<span class="c1"># Continue specific thread</span>
+thread<span class="w"> </span>apply<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="k">continue</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="race-condition-detection">Race Condition Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_race_conditions</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up debugging to catch race conditions&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    set pagination off</span>
+<span class="s1">    set non-stop on</span>
+<span class="s1">    set target-async on</span>
+
+<span class="s1">    # Track shared resource access</span>
+<span class="s1">    set $shared_resource = 0x601040</span>
+<span class="s1">    set $access_count = 0</span>
+
+<span class="s1">    # Hook shared resource access</span>
+<span class="s1">    watch *$shared_resource</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $access_count = $access_count + 1</span>
+<span class="s1">        printf &quot;Thread </span><span class="si">%d</span><span class="s1"> accessing shared resource (access #</span><span class="si">%d</span><span class="s1">)</span><span class="se">\\</span><span class="s1">n&quot;, $_thread, $access_count</span>
+<span class="s1">        printf &quot;Value: 0x</span><span class="si">%x</span><span class="s1"> at %p</span><span class="se">\\</span><span class="s1">n&quot;, *$shared_resource, $shared_resource</span>
+
+<span class="s1">        # Check for concurrent access</span>
+<span class="s1">        info threads</span>
+
+<span class="s1">        # Brief pause to increase chance of detecting races</span>
+<span class="s1">        shell sleep 0.1</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Monitor critical section entries</span>
+<span class="s1">    break pthread_mutex_lock</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;Thread </span><span class="si">%d</span><span class="s1"> acquiring mutex</span><span class="se">\\</span><span class="s1">n&quot;, $_thread</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break pthread_mutex_unlock  </span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;Thread </span><span class="si">%d</span><span class="s1"> releasing mutex</span><span class="se">\\</span><span class="s1">n&quot;, $_thread</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">deadlock_detector</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect potential deadlocks&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Track mutex operations</span>
+<span class="s1">    set $mutex_count = 0</span>
+<span class="s1">    set $waiting_threads = 0</span>
+
+<span class="s1">    break pthread_mutex_lock</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $mutex_count = $mutex_count + 1</span>
+<span class="s1">        printf &quot;Thread </span><span class="si">%d</span><span class="s1"> waiting for mutex (</span><span class="si">%d</span><span class="s1"> total locks)</span><span class="se">\\</span><span class="s1">n&quot;, $_thread, $mutex_count</span>
+
+<span class="s1">        # If too many threads waiting, possible deadlock</span>
+<span class="s1">        if $mutex_count &gt; 3</span>
+<span class="s1">            printf &quot;POTENTIAL DEADLOCK: </span><span class="si">%d</span><span class="s1"> threads waiting</span><span class="se">\\</span><span class="s1">n&quot;, $mutex_count</span>
+<span class="s1">            info threads</span>
+<span class="s1">            thread apply all bt</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break pthread_mutex_unlock</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $mutex_count = $mutex_count - 1</span>
+<span class="s1">        printf &quot;Thread </span><span class="si">%d</span><span class="s1"> released mutex (</span><span class="si">%d</span><span class="s1"> remaining)</span><span class="se">\\</span><span class="s1">n&quot;, $_thread, $mutex_count</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="heap-debugging">Heap Debugging</h2>
+<h3 id="heap-corruption-detection">Heap Corruption Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">heap_corruption_monitor</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor heap for corruption&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Track heap allocations</span>
+<span class="s1">    set $heap_chunks = 0</span>
+
+<span class="s1">    # Hook malloc/free</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $size = $rdi</span>
+<span class="s1">        finish</span>
+<span class="s1">        set $ptr = $rax</span>
+<span class="s1">        set $heap_chunks = $heap_chunks + 1</span>
+
+<span class="s1">        printf &quot;MALLOC: %p (size: </span><span class="si">%d</span><span class="s1">) [chunk #</span><span class="si">%d</span><span class="s1">]</span><span class="se">\\</span><span class="s1">n&quot;, $ptr, $size, $heap_chunks</span>
+
+<span class="s1">        # Set up heap metadata checking</span>
+<span class="s1">        # Store size before user data for checking</span>
+<span class="s1">        set *((long*)($ptr - 8)) = $size</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break free</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $ptr = $rdi</span>
+<span class="s1">        printf &quot;FREE: %p</span><span class="se">\\</span><span class="s1">n&quot;, $ptr</span>
+
+<span class="s1">        # Check if pointer looks valid</span>
+<span class="s1">        if $ptr &lt; 0x100000</span>
+<span class="s1">            printf &quot;SUSPICIOUS: Freeing low address %p</span><span class="se">\\</span><span class="s1">n&quot;, $ptr</span>
+<span class="s1">        end</span>
+
+<span class="s1">        # Check heap metadata</span>
+<span class="s1">        set $stored_size = *((long*)($ptr - 8))</span>
+<span class="s1">        printf &quot;Stored size: </span><span class="si">%d</span><span class="se">\\</span><span class="s1">n&quot;, $stored_size</span>
+
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Monitor heap-related functions</span>
+<span class="s1">    break realloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;REALLOC: %p -&gt; size </span><span class="si">%d</span><span class="se">\\</span><span class="s1">n&quot;, $rdi, $rsi</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">use_after_free_detector</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect use-after-free vulnerabilities&quot;&quot;&quot;</span>
+
+    <span class="n">gdb_script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Poison freed memory</span>
+<span class="s1">    set $poison_value = 0xdeadbeefdeadbeef</span>
+
+<span class="s1">    break free</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $ptr = $rdi</span>
+<span class="s1">        set $size = *((long*)($ptr - 8))  # Assume size stored before data</span>
+
+<span class="s1">        printf &quot;Poisoning freed memory at %p (size: </span><span class="si">%d</span><span class="s1">)</span><span class="se">\\</span><span class="s1">n&quot;, $ptr, $size</span>
+
+<span class="s1">        # Fill freed memory with poison value</span>
+<span class="s1">        set $i = 0</span>
+<span class="s1">        while $i &lt; $size / 8</span>
+<span class="s1">            set *((long*)($ptr + $i * 8)) = $poison_value</span>
+<span class="s1">            set $i = $i + 1</span>
+<span class="s1">        end</span>
+
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Check for access to poisoned memory</span>
+<span class="s1">    break *read_function</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $addr = $rdi</span>
+<span class="s1">        if *((long*)$addr) == $poison_value</span>
+<span class="s1">            printf &quot;USE-AFTER-FREE DETECTED: Reading poisoned memory at %p</span><span class="se">\\</span><span class="s1">n&quot;, $addr</span>
+<span class="s1">            backtrace</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">gdb_script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="custom-debugging-tools">Custom Debugging Tools</h2>
+<h3 id="dynamic-taint-analysis">Dynamic Taint Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TaintTracker</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tainted_addresses</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taint_sources</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_gdb_script</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate GDB script for taint tracking&quot;&quot;&quot;</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1"># Taint tracking implementation</span>
+<span class="s1">set $taint_enabled = 1</span>
+
+<span class="s1"># Source: user input functions</span>
+<span class="s1">break scanf</span>
+<span class="s1">commands</span>
+<span class="s1">    if $taint_enabled</span>
+<span class="s1">        printf &quot;TAINT SOURCE: scanf input at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rsi</span>
+<span class="s1">        # Mark buffer as tainted</span>
+<span class="s1">        call mark_tainted($rsi, strlen($rsi))</span>
+<span class="s1">    end</span>
+<span class="s1">    continue</span>
+<span class="s1">end</span>
+
+<span class="s1">break fgets</span>
+<span class="s1">commands</span>
+<span class="s1">    if $taint_enabled</span>
+<span class="s1">        printf &quot;TAINT SOURCE: fgets input at %p</span><span class="se">\\</span><span class="s1">n&quot;, $rdi</span>
+<span class="s1">        call mark_tainted($rdi, $rdx)</span>
+<span class="s1">    end</span>
+<span class="s1">    continue</span>
+<span class="s1">end</span>
+
+<span class="s1"># Propagation: string operations</span>
+<span class="s1">break strcpy</span>
+<span class="s1">commands</span>
+<span class="s1">    if $taint_enabled &amp;&amp; is_tainted($rsi)</span>
+<span class="s1">        printf &quot;TAINT PROPAGATION: strcpy %p -&gt; %p</span><span class="se">\\</span><span class="s1">n&quot;, $rsi, $rdi</span>
+<span class="s1">        call mark_tainted($rdi, strlen($rsi))</span>
+<span class="s1">    end</span>
+<span class="s1">    continue</span>
+<span class="s1">end</span>
+
+<span class="s1"># Sink: dangerous functions</span>
+<span class="s1">break system</span>
+<span class="s1">commands</span>
+<span class="s1">    if $taint_enabled &amp;&amp; is_tainted($rdi)</span>
+<span class="s1">        printf &quot;TAINT SINK: system() called with tainted data!</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        printf &quot;Command: </span><span class="si">%s</span><span class="se">\\</span><span class="s1">n&quot;, $rdi</span>
+<span class="s1">        backtrace</span>
+<span class="s1">    end</span>
+<span class="s1">    continue</span>
+<span class="s1">end</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">function_coverage_tracker</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Track function coverage during execution&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Function coverage tracking</span>
+<span class="s1">    set $coverage_count = 0</span>
+<span class="s1">    set logging file coverage.log</span>
+<span class="s1">    set logging on</span>
+
+<span class="s1">    # Hook function entries</span>
+<span class="s1">    define track_function</span>
+<span class="s1">        set $coverage_count = $coverage_count + 1</span>
+<span class="s1">        printf &quot;COVERAGE[</span><span class="si">%d</span><span class="s1">]: </span><span class="si">%s</span><span class="s1"> at %p</span><span class="se">\\</span><span class="s1">n&quot;, $coverage_count, $arg0, $rip</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Auto-generate hooks for all functions</span>
+<span class="s1">    python</span>
+<span class="s1">import gdb</span>
+
+<span class="s1"># Get all function symbols</span>
+<span class="s1">frame = gdb.selected_frame()</span>
+<span class="s1">inf = gdb.selected_inferior()</span>
+
+<span class="s1">for symbol in gdb.lookup_global_symbol(&quot;main&quot;).symtab.linetable():</span>
+<span class="s1">    if symbol.is_function:</span>
+<span class="s1">        addr = symbol.value().address</span>
+<span class="s1">        name = symbol.name</span>
+
+<span class="s1">        # Create breakpoint</span>
+<span class="s1">        bp = gdb.Breakpoint(f&quot;*</span><span class="si">{addr}</span><span class="s1">&quot;)</span>
+<span class="s1">        bp.commands = f&#39;track_function &quot;</span><span class="si">{name}</span><span class="s1">&quot;</span><span class="se">\\</span><span class="s1">ncontinue&#39;</span>
+
+<span class="s1">end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">script</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="performance-profiling">Performance Profiling</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">performance_profiler</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Profile function execution times&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Performance profiling</span>
+<span class="s1">    set $prof_enabled = 1</span>
+<span class="s1">    set $prof_start_time = 0</span>
+<span class="s1">    set $prof_function_times = 0</span>
+
+<span class="s1">    define start_timer</span>
+<span class="s1">        if $prof_enabled</span>
+<span class="s1">            shell date +</span><span class="si">%s</span><span class="s1">%N &gt; /tmp/gdb_timer</span>
+<span class="s1">            set $prof_start_time = system(&quot;cat /tmp/gdb_timer&quot;)</span>
+<span class="s1">        end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    define end_timer</span>
+<span class="s1">        if $prof_enabled</span>
+<span class="s1">            shell date +</span><span class="si">%s</span><span class="s1">%N &gt; /tmp/gdb_timer  </span>
+<span class="s1">            set $end_time = system(&quot;cat /tmp/gdb_timer&quot;)</span>
+<span class="s1">            set $duration = $end_time - $prof_start_time</span>
+<span class="s1">            printf &quot;Function duration: </span><span class="si">%d</span><span class="s1"> nanoseconds</span><span class="se">\\</span><span class="s1">n&quot;, $duration</span>
+<span class="s1">        end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Profile specific functions</span>
+<span class="s1">    break expensive_function</span>
+<span class="s1">    commands</span>
+<span class="s1">        start_timer</span>
+<span class="s1">        finish</span>
+<span class="s1">        end_timer</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Profile memory allocations</span>
+<span class="s1">    break malloc</span>
+<span class="s1">    commands</span>
+<span class="s1">        start_timer</span>
+<span class="s1">        finish</span>
+<span class="s1">        end_timer</span>
+<span class="s1">        printf &quot;malloc(</span><span class="si">%d</span><span class="s1">) took time above</span><span class="se">\\</span><span class="s1">n&quot;, $arg0</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bottleneck_analyzer</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze performance bottlenecks&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Bottleneck analysis</span>
+<span class="s1">    set $call_counts = 0</span>
+<span class="s1">    set $total_calls = 0</span>
+
+<span class="s1">    # Count function calls</span>
+<span class="s1">    define count_calls</span>
+<span class="s1">        set $call_counts = $call_counts + 1</span>
+<span class="s1">        set $total_calls = $total_calls + 1</span>
+
+<span class="s1">        # Report every 1000 calls</span>
+<span class="s1">        if $call_counts &gt;= 1000</span>
+<span class="s1">            printf &quot;Performance report: </span><span class="si">%d</span><span class="s1"> total calls</span><span class="se">\\</span><span class="s1">n&quot;, $total_calls</span>
+<span class="s1">            set $call_counts = 0</span>
+<span class="s1">        end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Hook frequently called functions</span>
+<span class="s1">    break strlen</span>
+<span class="s1">    commands</span>
+<span class="s1">        count_calls</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break malloc</span>
+<span class="s1">    commands  </span>
+<span class="s1">        count_calls</span>
+<span class="s1">        printf &quot;malloc overhead detected</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Detect infinite loops</span>
+<span class="s1">    break *loop_start</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $loop_count = $loop_count + 1</span>
+<span class="s1">        if $loop_count &gt; 10000</span>
+<span class="s1">            printf &quot;POTENTIAL INFINITE LOOP: </span><span class="si">%d</span><span class="s1"> iterations</span><span class="se">\\</span><span class="s1">n&quot;, $loop_count</span>
+<span class="s1">            backtrace</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="reverse-engineering-specific-techniques">Reverse Engineering Specific Techniques</h2>
+<h3 id="anti-debugging-bypass">Anti-debugging Bypass</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">bypass_anti_debugging</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bypass common anti-debugging techniques&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Bypass IsDebuggerPresent</span>
+<span class="s1">    break IsDebuggerPresent</span>
+<span class="s1">    commands</span>
+<span class="s1">        finish</span>
+<span class="s1">        set $rax = 0</span>
+<span class="s1">        printf &quot;Bypassed IsDebuggerPresent</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Bypass timing checks</span>
+<span class="s1">    break GetTickCount</span>
+<span class="s1">    commands</span>
+<span class="s1">        finish</span>
+<span class="s1">        # Return consistent time</span>
+<span class="s1">        set $rax = 1000000</span>
+<span class="s1">        printf &quot;Bypassed timing check</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Bypass NtQueryInformationProcess</span>
+<span class="s1">    break NtQueryInformationProcess</span>
+<span class="s1">    commands</span>
+<span class="s1">        if $rsi == 7  # ProcessDebugPort</span>
+<span class="s1">            finish</span>
+<span class="s1">            set $rax = 0  # No debug port</span>
+<span class="s1">            printf &quot;Bypassed ProcessDebugPort check</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Handle SIGTRAP</span>
+<span class="s1">    handle SIGTRAP noprint nostop pass</span>
+
+<span class="s1">    # Handle hardware breakpoint detection</span>
+<span class="s1">    break ptrace</span>
+<span class="s1">    commands</span>
+<span class="s1">        if $rdi == 0  # PTRACE_TRACEME</span>
+<span class="s1">            finish</span>
+<span class="s1">            set $rax = 0  # Success</span>
+<span class="s1">            printf &quot;Bypassed ptrace detection</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">crypto_analysis_setup</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up debugging for cryptographic analysis&quot;&quot;&quot;</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Crypto function hooking</span>
+<span class="s1">    set pagination off</span>
+<span class="s1">    set logging file crypto_trace.log</span>
+<span class="s1">    set logging on</span>
+
+<span class="s1">    # Common crypto functions</span>
+<span class="s1">    break AES_encrypt</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;AES_encrypt called</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        printf &quot;  Input: &quot;</span>
+<span class="s1">        x/16bx $rdi</span>
+<span class="s1">        printf &quot;  Key: &quot;  </span>
+<span class="s1">        x/16bx $rsi</span>
+<span class="s1">        finish</span>
+<span class="s1">        printf &quot;  Output: &quot;</span>
+<span class="s1">        x/16bx $rdi</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    break MD5_Update</span>
+<span class="s1">    commands</span>
+<span class="s1">        printf &quot;MD5_Update: data at %p, len=</span><span class="si">%d</span><span class="se">\\</span><span class="s1">n&quot;, $rsi, $rdx</span>
+<span class="s1">        if $rdx &lt;= 64</span>
+<span class="s1">            printf &quot;  Data: &quot;</span>
+<span class="s1">            x/bx $rsi</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Look for crypto constants</span>
+<span class="s1">    break *crypto_function</span>
+<span class="s1">    commands</span>
+<span class="s1">        # Check for known crypto constants</span>
+<span class="s1">        if $rax == 0x67452301  # MD5 constant</span>
+<span class="s1">            printf &quot;MD5 constant detected</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        end</span>
+<span class="s1">        if $rax == 0x6A09E667  # SHA256 constant</span>
+<span class="s1">            printf &quot;SHA256 constant detected</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        end</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">script</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="automation-and-scripting">Automation and Scripting</h2>
+<h3 id="automated-vulnerability-discovery">Automated Vulnerability Discovery</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">VulnFinder</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span> <span class="o">=</span> <span class="n">binary_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vulnerabilities</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_fuzzing_script</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate GDB script for automated fuzzing&quot;&quot;&quot;</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Automated vulnerability discovery</span>
+<span class="s1">    set pagination off</span>
+<span class="s1">    set $crash_count = 0</span>
+<span class="s1">    set $test_count = 0</span>
+
+<span class="s1">    define fuzz_test</span>
+<span class="s1">        set $test_count = $test_count + 1</span>
+<span class="s1">        printf &quot;Fuzz test #</span><span class="si">%d</span><span class="se">\\</span><span class="s1">n&quot;, $test_count</span>
+
+<span class="s1">        # Generate random input</span>
+<span class="s1">        python</span>
+<span class="s1">import random</span>
+<span class="s1">import string</span>
+
+<span class="s1"># Generate random string</span>
+<span class="s1">length = random.randint(1, 1000)</span>
+<span class="s1">chars = string.ascii_letters + string.digits + string.punctuation</span>
+<span class="s1">test_input = &#39;&#39;.join(random.choice(chars) for _ in range(length))</span>
+
+<span class="s1"># Write to file for program input</span>
+<span class="s1">with open(&#39;/tmp/fuzz_input&#39;, &#39;w&#39;) as f:</span>
+<span class="s1">    f.write(test_input)</span>
+
+<span class="s1">gdb.execute(f&#39;run &lt; /tmp/fuzz_input&#39;)</span>
+<span class="s1">end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Handle crashes</span>
+<span class="s1">    define handle_crash</span>
+<span class="s1">        set $crash_count = $crash_count + 1</span>
+<span class="s1">        printf &quot;CRASH #</span><span class="si">%d</span><span class="s1"> detected!</span><span class="se">\\</span><span class="s1">n&quot;, $crash_count</span>
+
+<span class="s1">        # Log crash info</span>
+<span class="s1">        printf &quot;RIP: %p</span><span class="se">\\</span><span class="s1">n&quot;, $rip</span>
+<span class="s1">        printf &quot;RSP: %p</span><span class="se">\\</span><span class="s1">n&quot;, $rsp</span>
+<span class="s1">        backtrace</span>
+
+<span class="s1">        # Check crash type</span>
+<span class="s1">        if $rip &gt; 0x7f0000000000</span>
+<span class="s1">            printf &quot;Crash in library code</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        else</span>
+<span class="s1">            printf &quot;Crash in main binary</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">        end</span>
+
+<span class="s1">        # Save core dump</span>
+<span class="s1">        generate-core-file</span>
+
+<span class="s1">        # Continue fuzzing</span>
+<span class="s1">        fuzz_test</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Start fuzzing</span>
+<span class="s1">    signal SIGSEGV handle_crash</span>
+<span class="s1">    signal SIGBUS handle_crash</span>
+<span class="s1">    signal SIGFPE handle_crash</span>
+
+<span class="s1">    fuzz_test</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">script</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stack_overflow_detector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specific stack overflow detection&quot;&quot;&quot;</span>
+
+        <span class="n">script</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">    # Stack overflow detection</span>
+<span class="s1">    set $stack_start = $rsp</span>
+<span class="s1">    set $stack_size = 0x2000  # 8KB stack window</span>
+
+<span class="s1">    # Monitor stack growth</span>
+<span class="s1">    define check_stack</span>
+<span class="s1">        set $current_stack = $rsp</span>
+<span class="s1">        set $stack_used = $stack_start - $current_stack</span>
+
+<span class="s1">        if $stack_used &gt; $stack_size</span>
+<span class="s1">            printf &quot;LARGE STACK USAGE: </span><span class="si">%d</span><span class="s1"> bytes</span><span class="se">\\</span><span class="s1">n&quot;, $stack_used</span>
+<span class="s1">            backtrace 10</span>
+<span class="s1">        end</span>
+
+<span class="s1">        # Check for stack smashing</span>
+<span class="s1">        set $canary_addr = $rbp + 8</span>
+<span class="s1">        if *((long*)$canary_addr) != $original_canary</span>
+<span class="s1">            printf &quot;STACK SMASHING DETECTED!</span><span class="se">\\</span><span class="s1">n&quot;</span>
+<span class="s1">            printf &quot;Canary: expected %p, found %p</span><span class="se">\\</span><span class="s1">n&quot;, $original_canary, *((long*)$canary_addr)</span>
+<span class="s1">            backtrace</span>
+<span class="s1">        end</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Hook function entries/exits</span>
+<span class="s1">    break *main</span>
+<span class="s1">    commands</span>
+<span class="s1">        set $original_canary = *((long*)($rbp + 8))</span>
+<span class="s1">        printf &quot;Original canary: %p</span><span class="se">\\</span><span class="s1">n&quot;, $original_canary</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+
+<span class="s1">    # Check on every function call</span>
+<span class="s1">    break *</span>
+<span class="s1">    commands</span>
+<span class="s1">        check_stack</span>
+<span class="s1">        continue</span>
+<span class="s1">    end</span>
+<span class="s1">    &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">script</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_debug_harness</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create comprehensive debugging harness&quot;&quot;&quot;</span>
+
+    <span class="n">harness</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">#!/usr/bin/env python3</span>
+<span class="s1">from pwn import *</span>
+<span class="s1">import sys</span>
+
+<span class="s1">class DebugHarness:</span>
+<span class="s1">    def __init__(self, binary_path):</span>
+<span class="s1">        self.binary = binary_path</span>
+<span class="s1">        self.context = context</span>
+<span class="s1">        self.context.log_level = &#39;debug&#39;</span>
+
+<span class="s1">    def run_with_input(self, test_input):</span>
+<span class="s1">        &quot;&quot;&quot;Run binary with specific input and monitor for issues&quot;&quot;&quot;</span>
+<span class="s1">        try:</span>
+<span class="s1">            p = process(self.binary)</span>
+<span class="s1">            p.sendline(test_input)</span>
+
+<span class="s1">            # Wait for completion or timeout</span>
+<span class="s1">            output = p.recvall(timeout=5)</span>
+<span class="s1">            p.close()</span>
+
+<span class="s1">            return {</span>
+<span class="s1">                &#39;success&#39;: True,</span>
+<span class="s1">                &#39;output&#39;: output,</span>
+<span class="s1">                &#39;crashed&#39;: False</span>
+<span class="s1">            }</span>
+
+<span class="s1">        except Exception as e:</span>
+<span class="s1">            return {</span>
+<span class="s1">                &#39;success&#39;: False,</span>
+<span class="s1">                &#39;output&#39;: None,</span>
+<span class="s1">                &#39;crashed&#39;: True,</span>
+<span class="s1">                &#39;error&#39;: str(e)</span>
+<span class="s1">            }</span>
+
+<span class="s1">    def test_buffer_overflow(self):</span>
+<span class="s1">        &quot;&quot;&quot;Test for buffer overflow vulnerabilities&quot;&quot;&quot;</span>
+<span class="s1">        print(&quot;Testing for buffer overflows...&quot;)</span>
+
+<span class="s1">        for size in [100, 200, 500, 1000, 2000, 5000]:</span>
+<span class="s1">            test_input = b&#39;A&#39; * size</span>
+<span class="s1">            result = self.run_with_input(test_input)</span>
+
+<span class="s1">            if result[&#39;crashed&#39;]:</span>
+<span class="s1">                print(f&quot;CRASH detected with </span><span class="si">{size}</span><span class="s1"> bytes!&quot;)</span>
+<span class="s1">                return size</span>
+
+<span class="s1">        return None</span>
+
+<span class="s1">    def test_format_string(self):</span>
+<span class="s1">        &quot;&quot;&quot;Test for format string vulnerabilities&quot;&quot;&quot;</span>
+<span class="s1">        print(&quot;Testing for format string bugs...&quot;)</span>
+
+<span class="s1">        format_strings = [</span>
+<span class="s1">            b&#39;</span><span class="si">%x</span><span class="s1">&#39; * 10,</span>
+<span class="s1">            b&#39;</span><span class="si">%s</span><span class="s1">&#39; * 5,</span>
+<span class="s1">            b&#39;%n&#39;,</span>
+<span class="s1">            b&#39;%p&#39; * 20,</span>
+<span class="s1">            b&#39;AAAA&#39; + b&#39;</span><span class="si">%x</span><span class="s1">&#39; * 10</span>
+<span class="s1">        ]</span>
+
+<span class="s1">        for fmt_str in format_strings:</span>
+<span class="s1">            result = self.run_with_input(fmt_str)</span>
+
+<span class="s1">            if result[&#39;success&#39;] and result[&#39;output&#39;]:</span>
+<span class="s1">                if b&#39;41414141&#39; in result[&#39;output&#39;]:  # Our AAAA marker</span>
+<span class="s1">                    print(&quot;Format string vulnerability detected!&quot;)</span>
+<span class="s1">                    return True</span>
+
+<span class="s1">        return False</span>
+
+<span class="s1">if __name__ == &#39;__main__&#39;:</span>
+<span class="s1">    if len(sys.argv) != 2:</span>
+<span class="s1">        print(&quot;Usage: debug_harness.py &lt;binary&gt;&quot;)</span>
+<span class="s1">        sys.exit(1)</span>
+
+<span class="s1">    harness = DebugHarness(sys.argv[1])</span>
+
+<span class="s1">    # Run tests</span>
+<span class="s1">    overflow_size = harness.test_buffer_overflow()</span>
+<span class="s1">    format_vuln = harness.test_format_string()</span>
+
+<span class="s1">    print(f&quot;</span><span class="se">\\</span><span class="s1">nResults:&quot;)</span>
+<span class="s1">    print(f&quot;Buffer overflow: {&#39;Yes&#39; if overflow_size else &#39;No&#39;}&quot;)</span>
+<span class="s1">    if overflow_size:</span>
+<span class="s1">        print(f&quot;  Crashes at </span><span class="si">{overflow_size}</span><span class="s1"> bytes&quot;)</span>
+<span class="s1">    print(f&quot;Format string: {&#39;Yes&#39; if format_vuln else &#39;No&#39;}&quot;)</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">harness</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Advanced Debugging Fundamentals</p>
+<ul>
+<li><strong>Conditional breakpoints</strong> save time by breaking only when needed</li>
+<li><strong>Watchpoints</strong> help track memory corruption and data flow</li>
+<li><strong>Multi-threaded debugging</strong> requires special techniques for race conditions</li>
+<li><strong>Automation</strong> increases efficiency for repetitive analysis tasks</li>
+<li><strong>Custom scripts</strong> can detect specific vulnerability patterns</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Debugging Best Practices</p>
+<ul>
+<li>Use logging to capture debugging sessions for later analysis</li>
+<li>Combine static and dynamic analysis for complete understanding</li>
+<li>Automate repetitive debugging tasks with custom scripts</li>
+<li>Use watchpoints sparingly as they can slow execution significantly</li>
+<li>Practice with simple programs before tackling complex binaries</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Common Debugging Challenges</p>
+<ul>
+<li>Anti-debugging techniques can interfere with analysis</li>
+<li>Optimized code may behave differently than source suggests</li>
+<li>Threading issues can be non-deterministic and hard to reproduce</li>
+<li>Large programs may require selective debugging of specific components</li>
+<li>Memory corruption can cause delayed crashes far from the root cause</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../03-patching/">Binary Patching</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

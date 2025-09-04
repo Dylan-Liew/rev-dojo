@@ -1,0 +1,1684 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/dynamic/01-gdb-basics/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>GDB with PEDA/Pwndbg - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gdb-with-pedapwndbg" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GDB with PEDA/Pwndbg
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#gdb-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      GDB Basics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GDB Basics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-and-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-gdb-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic GDB Commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breakpoint-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Breakpoint Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-examination" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Examination
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#peda-enhanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      PEDA Enhanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PEDA Enhanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-display" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Display
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-generation-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pattern Generation and Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-searching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory Searching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwndbg-enhanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pwndbg Enhanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pwndbg Enhanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#heap-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Heap Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enhanced-memory-display" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enhanced Memory Display
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Search
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-debugging-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Practical Debugging Sessions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Debugging Sessions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-a-buffer-overflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyzing a Buffer Overflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dynamic-analysis-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dynamic Analysis Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-analysis-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Analysis Script
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-debugging-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Debugging Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Debugging Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-threaded-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-threaded Debugging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-dump-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Dump Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remote Debugging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti-debugging-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anti-debugging Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-gdb-scripts-and-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom GDB Scripts and Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom GDB Scripts and Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exploit-development-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exploit Development Script
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-vulnerability-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Vulnerability Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-exploit-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Exploit Development
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Exploit Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwntools-gdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      pwntools + GDB
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-debugging-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Debugging Session
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debugging-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-gdb-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common GDB Configurations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-focused-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security-focused Analysis
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="gdb-with-pedapwndbg">GDB with PEDA/Pwndbg</h1>
+<p>GDB (GNU Debugger) is a powerful debugger for analyzing and debugging programs. When enhanced with PEDA or Pwndbg, it becomes an indispensable tool for reverse engineering and exploit development.</p>
+<h2 id="gdb-basics">GDB Basics</h2>
+<h3 id="installation-and-setup">Installation and Setup</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Install GDB</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>gdb
+
+<span class="c1"># Install PEDA</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/longld/peda.git<span class="w"> </span>~/peda
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;source ~/peda/peda.py&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.gdbinit
+
+<span class="c1"># Or install Pwndbg (alternative to PEDA)</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/pwndbg/pwndbg
+<span class="nb">cd</span><span class="w"> </span>pwndbg
+./setup.sh
+
+<span class="c1"># Or install GEF (another alternative)</span>
+bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>curl<span class="w"> </span>-fsSL<span class="w"> </span>http://gef.blah.cat/sh<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="basic-gdb-commands">Basic GDB Commands</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Starting GDB</span>
+gdb<span class="w"> </span>./program<span class="w">                    </span><span class="c1"># Load program</span>
+gdb<span class="w"> </span>--args<span class="w"> </span>./program<span class="w"> </span>arg1<span class="w"> </span>arg2<span class="w">   </span><span class="c1"># Load with arguments</span>
+gdb<span class="w"> </span>-p<span class="w"> </span>&lt;pid&gt;<span class="w">                     </span><span class="c1"># Attach to running process</span>
+
+<span class="c1"># Basic execution control</span>
+run<span class="w"> </span><span class="o">[</span>args<span class="o">]</span><span class="w">                       </span><span class="c1"># Start program</span>
+<span class="k">continue</span><span class="w"> </span><span class="o">(</span>c<span class="o">)</span><span class="w">                     </span><span class="c1"># Continue execution</span>
+step<span class="w"> </span><span class="o">(</span>s<span class="o">)</span><span class="w">                         </span><span class="c1"># Step into functions</span>
+next<span class="w"> </span><span class="o">(</span>n<span class="o">)</span><span class="w">                         </span><span class="c1"># Step over functions</span>
+finish<span class="w">                           </span><span class="c1"># Run until function returns</span>
+<span class="nb">kill</span><span class="w">                             </span><span class="c1"># Kill running program</span>
+quit<span class="w"> </span><span class="o">(</span>q<span class="o">)</span><span class="w">                         </span><span class="c1"># Exit GDB</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="breakpoint-management">Breakpoint Management</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Setting breakpoints</span>
+<span class="k">break</span><span class="w"> </span>main<span class="w">                       </span><span class="c1"># Break at function</span>
+<span class="k">break</span><span class="w"> </span>*0x400000<span class="w">                  </span><span class="c1"># Break at address</span>
+<span class="k">break</span><span class="w"> </span>filename.c:42<span class="w">              </span><span class="c1"># Break at line number</span>
+<span class="k">break</span><span class="w"> </span>+10<span class="w">                        </span><span class="c1"># Break 10 lines ahead</span>
+<span class="k">break</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">$eax</span><span class="w"> </span><span class="o">==</span><span class="w"> </span>0x41<span class="w">            </span><span class="c1"># Conditional breakpoint</span>
+
+<span class="c1"># Breakpoint operations</span>
+info<span class="w"> </span>breakpoints<span class="w">                 </span><span class="c1"># List all breakpoints</span>
+delete<span class="w"> </span><span class="m">1</span><span class="w">                         </span><span class="c1"># Delete breakpoint 1</span>
+delete<span class="w">                           </span><span class="c1"># Delete all breakpoints</span>
+disable<span class="w"> </span><span class="m">1</span><span class="w">                        </span><span class="c1"># Disable breakpoint 1</span>
+<span class="nb">enable</span><span class="w"> </span><span class="m">1</span><span class="w">                         </span><span class="c1"># Enable breakpoint 1</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="memory-examination">Memory Examination</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Examine memory</span>
+x/10wx<span class="w"> </span><span class="nv">$esp</span><span class="w">                      </span><span class="c1"># 10 words in hex at ESP</span>
+x/20i<span class="w"> </span><span class="nv">$eip</span><span class="w">                       </span><span class="c1"># 20 instructions at EIP</span>
+x/s<span class="w"> </span>0x400000<span class="w">                     </span><span class="c1"># String at address</span>
+x/100bx<span class="w"> </span><span class="nv">$esp</span><span class="w">                     </span><span class="c1"># 100 bytes in hex</span>
+
+<span class="c1"># Format specifiers</span>
+x/<span class="o">[</span>count<span class="o">][</span>size<span class="o">][</span>format<span class="o">]</span><span class="w"> </span>address
+<span class="c1"># size: b(byte), h(halfword), w(word), g(giant/8bytes)</span>
+<span class="c1"># format: x(hex), d(decimal), u(unsigned), o(octal), t(binary), a(address), c(char), s(string), i(instruction)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="register-operations">Register Operations</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># View registers</span>
+info<span class="w"> </span>registers<span class="w">                   </span><span class="c1"># All general registers</span>
+info<span class="w"> </span>all-registers<span class="w">              </span><span class="c1"># All registers including FPU/SSE</span>
+print<span class="w"> </span><span class="nv">$eax</span><span class="w">                       </span><span class="c1"># Print specific register</span>
+print/x<span class="w"> </span><span class="nv">$eax</span><span class="w">                     </span><span class="c1"># Print in hex</span>
+
+<span class="c1"># Modify registers</span>
+<span class="nb">set</span><span class="w"> </span><span class="nv">$eax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>0x41414141<span class="w">           </span><span class="c1"># Set register value</span>
+<span class="nb">set</span><span class="w"> </span><span class="nv">$eip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>0x8048000<span class="w">           </span><span class="c1"># Change instruction pointer</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="peda-enhanced-features">PEDA Enhanced Features</h2>
+<p>PEDA (Python Exploit Development Assistance) adds many useful features to GDB:</p>
+<h3 id="enhanced-display">Enhanced Display</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># PEDA automatically shows:</span>
+<span class="c1"># - Register values</span>
+<span class="c1"># - Stack contents  </span>
+<span class="c1"># - Disassembly around current instruction</span>
+<span class="c1"># - Memory mappings</span>
+
+<span class="c1"># Force refresh display</span>
+context<span class="w">                          </span><span class="c1"># Show context information</span>
+context<span class="w"> </span>stack<span class="w">                   </span><span class="c1"># Show only stack</span>
+context<span class="w"> </span>code<span class="w">                    </span><span class="c1"># Show only code</span>
+context<span class="w"> </span>register<span class="w">                </span><span class="c1"># Show only registers</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="pattern-generation-and-analysis">Pattern Generation and Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Generate cyclic pattern</span>
+pattern<span class="w"> </span>create<span class="w"> </span><span class="m">100</span><span class="w">               </span><span class="c1"># Create 100-byte pattern</span>
+pattern<span class="w"> </span>create<span class="w"> </span><span class="m">100</span><span class="w"> </span>pattern.txt<span class="w">  </span><span class="c1"># Save to file</span>
+
+<span class="c1"># Find offset in pattern</span>
+pattern<span class="w"> </span>offset<span class="w"> </span>0x41414141<span class="w">        </span><span class="c1"># Find offset of value in pattern</span>
+pattern<span class="w"> </span>offset<span class="w"> </span><span class="nv">$eip</span><span class="w">              </span><span class="c1"># Find offset of current EIP</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="security-analysis">Security Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check security features</span>
+checksec<span class="w">                         </span><span class="c1"># Show binary protections</span>
+
+<span class="c1"># Find gadgets for ROP</span>
+ropsearch<span class="w"> </span><span class="s2">&quot;pop rdi&quot;</span><span class="w">             </span><span class="c1"># Search for ROP gadgets</span>
+ropsearch<span class="w"> </span><span class="s2">&quot;pop rdi; ret&quot;</span><span class="w">        </span><span class="c1"># More specific search</span>
+
+<span class="c1"># Search for instructions</span>
+asmsearch<span class="w"> </span><span class="s2">&quot;jmp esp&quot;</span><span class="w">             </span><span class="c1"># Find JMP ESP instructions</span>
+asmsearch<span class="w"> </span><span class="s2">&quot;int 0x80&quot;</span><span class="w">            </span><span class="c1"># Find system call instructions</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="memory-searching">Memory Searching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Search for patterns</span>
+searchmem<span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="w">            </span><span class="c1"># Search for string in memory</span>
+searchmem<span class="w"> </span>0x41414141<span class="w">           </span><span class="c1"># Search for value</span>
+searchmem<span class="w"> </span><span class="s2">&quot;\x41\x41\x41\x41&quot;</span><span class="w">  </span><span class="c1"># Search for bytes</span>
+
+<span class="c1"># Search in specific regions</span>
+searchmem<span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="w"> </span>stack<span class="w">     </span><span class="c1"># Search only in stack</span>
+searchmem<span class="w"> </span>0x41414141<span class="w"> </span>heap<span class="w">      </span><span class="c1"># Search only in heap</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="pwndbg-enhanced-features">Pwndbg Enhanced Features</h2>
+<p>Pwndbg is a modern alternative to PEDA with additional features:</p>
+<h3 id="heap-analysis">Heap Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Heap commands</span>
+heap<span class="w">                            </span><span class="c1"># Show heap information</span>
+heap<span class="w"> </span>chunks<span class="w">                     </span><span class="c1"># Show all heap chunks</span>
+heap<span class="w"> </span>bins<span class="w">                       </span><span class="c1"># Show heap bins</span>
+arena<span class="w">                          </span><span class="c1"># Show arena information</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="enhanced-memory-display">Enhanced Memory Display</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Memory visualization</span>
+vmmap<span class="w">                          </span><span class="c1"># Show memory mappings</span>
+stack<span class="w">                          </span><span class="c1"># Show stack contents</span>
+telescope<span class="w"> </span><span class="nv">$rsp</span><span class="w">                 </span><span class="c1"># Smart stack/memory viewer</span>
+hexdump<span class="w"> </span><span class="nv">$rsp</span><span class="w">                   </span><span class="c1"># Hex dump of memory</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="advanced-search">Advanced Search</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Search capabilities</span>
+search<span class="w"> </span>-t<span class="w"> </span>string<span class="w"> </span><span class="s2">&quot;password&quot;</span><span class="w">    </span><span class="c1"># Search for string</span>
+search<span class="w"> </span>-t<span class="w"> </span>bytes<span class="w"> </span><span class="s2">&quot;\x41\x41&quot;</span><span class="w">     </span><span class="c1"># Search for bytes</span>
+search<span class="w"> </span>-t<span class="w"> </span>qword<span class="w"> </span>0x41414141<span class="w">     </span><span class="c1"># Search for 8-byte value</span>
+
+<span class="c1"># Find references</span>
+xrefs<span class="w"> </span>0x400000<span class="w">                 </span><span class="c1"># Find cross-references to address</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="practical-debugging-sessions">Practical Debugging Sessions</h2>
+<h3 id="analyzing-a-buffer-overflow">Analyzing a Buffer Overflow</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// debug_target.c</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">vulnerable_function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Buffer at: %p</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Enter input: &quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">gets</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;You entered: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">buffer</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">vulnerable_function</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>GDB Session:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile with debug info</span>
+gcc<span class="w"> </span>-g<span class="w"> </span>-fno-stack-protector<span class="w"> </span>-no-pie<span class="w"> </span>-o<span class="w"> </span>debug_target<span class="w"> </span>debug_target.c
+
+<span class="c1"># Start debugging session</span>
+$<span class="w"> </span>gdb<span class="w"> </span>./debug_target
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>disassembly-flavor<span class="w"> </span>intel
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>vulnerable_function
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>run
+
+<span class="c1"># When breakpoint hits</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>disas<span class="w"> </span>vulnerable_function
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>*vulnerable_function+XX<span class="w">  </span><span class="c1"># Break after gets()</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">continue</span>
+
+<span class="c1"># Input that causes overflow</span>
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBCCCCDDDD
+
+<span class="c1"># Examine the crash</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>info<span class="w"> </span>registers
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>x/20wx<span class="w"> </span><span class="nv">$rsp</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>bt<span class="w">  </span><span class="c1"># Backtrace</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="dynamic-analysis-workflow">Dynamic Analysis Workflow</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Start with context information</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>context
+
+<span class="c1"># Set breakpoint at function entry</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>main
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>run
+
+<span class="c1"># Examine function prologue</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>disas<span class="w"> </span>main
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>si<span class="w">  </span><span class="c1"># Step through instructions</span>
+
+<span class="c1"># Watch memory changes</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>watch<span class="w"> </span>*0x601040<span class="w">  </span><span class="c1"># Watch memory location</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>rwatch<span class="w"> </span>*0x601040<span class="w"> </span><span class="c1"># Watch for reads</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>awatch<span class="w"> </span>*0x601040<span class="w"> </span><span class="c1"># Watch for reads/writes</span>
+
+<span class="c1"># Trace function calls</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>logging<span class="w"> </span>on
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>trace-commands<span class="w"> </span>on
+</code></pre></div></td></tr></table></div>
+<h3 id="automated-analysis-script">Automated Analysis Script</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># gdb_script.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gdb</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BufferOverflowAnalyzer</span><span class="p">(</span><span class="n">gdb</span><span class="o">.</span><span class="n">Command</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze buffer overflow potential&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BufferOverflowAnalyzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;analyze-overflow&quot;</span><span class="p">,</span> <span class="n">gdb</span><span class="o">.</span><span class="n">COMMAND_USER</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">from_tty</span><span class="p">):</span>
+        <span class="c1"># Get current frame info</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">selected_frame</span><span class="p">()</span>
+
+        <span class="c1"># Find dangerous functions</span>
+        <span class="n">dangerous_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gets&#39;</span><span class="p">,</span> <span class="s1">&#39;strcpy&#39;</span><span class="p">,</span> <span class="s1">&#39;sprintf&#39;</span><span class="p">,</span> <span class="s1">&#39;scanf&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Search for these in the binary</span>
+        <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">dangerous_funcs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">addr</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&amp;</span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found dangerous function </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">addr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Analyze current stack frame</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sp</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="s2">&quot;$rsp&quot;</span><span class="p">)</span>
+            <span class="n">bp</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="s2">&quot;$rbp&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stack pointer: </span><span class="si">{</span><span class="n">sp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Base pointer: </span><span class="si">{</span><span class="n">bp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stack frame size: </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not analyze stack frame&quot;</span><span class="p">)</span>
+
+<span class="n">BufferOverflowAnalyzer</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Load script in GDB:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>gdb_script.py
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>analyze-overflow
+</code></pre></div></td></tr></table></div></p>
+<h2 id="advanced-debugging-techniques">Advanced Debugging Techniques</h2>
+<h3 id="multi-threaded-debugging">Multi-threaded Debugging</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Thread operations</span>
+info<span class="w"> </span>threads<span class="w">                    </span><span class="c1"># List all threads</span>
+thread<span class="w"> </span><span class="m">2</span><span class="w">                        </span><span class="c1"># Switch to thread 2</span>
+thread<span class="w"> </span>apply<span class="w"> </span>all<span class="w"> </span>bt<span class="w">             </span><span class="c1"># Backtrace all threads</span>
+<span class="nb">set</span><span class="w"> </span>scheduler-locking<span class="w"> </span>on<span class="w">        </span><span class="c1"># Lock scheduler to current thread</span>
+
+<span class="c1"># Thread-specific breakpoints</span>
+<span class="k">break</span><span class="w"> </span>main<span class="w"> </span>thread<span class="w"> </span><span class="m">2</span><span class="w">             </span><span class="c1"># Break in main only for thread 2</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="core-dump-analysis">Core Dump Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Generate core dump</span>
+<span class="nb">ulimit</span><span class="w"> </span>-c<span class="w"> </span>unlimited<span class="w">             </span><span class="c1"># Enable core dumps</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;core.%p&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/proc/sys/kernel/core_pattern
+
+<span class="c1"># Analyze core dump</span>
+gdb<span class="w"> </span>./program<span class="w"> </span>core.1234
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>bt<span class="w">                        </span><span class="c1"># Backtrace</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>info<span class="w"> </span>registers<span class="w">            </span><span class="c1"># Register state at crash</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>x/20wx<span class="w"> </span><span class="nv">$rsp</span><span class="w">              </span><span class="c1"># Stack contents</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="remote-debugging">Remote Debugging</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># On target machine</span>
+gdbserver<span class="w"> </span>:1234<span class="w"> </span>./program
+
+<span class="c1"># On debugging machine  </span>
+gdb<span class="w"> </span>./program
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>target<span class="w"> </span>remote<span class="w"> </span>target-ip:1234
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">continue</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="anti-debugging-detection">Anti-debugging Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check for debugger presence</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>catch<span class="w"> </span>syscall<span class="w"> </span>ptrace<span class="w">      </span><span class="c1"># Catch ptrace syscalls</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>IsDebuggerPresent<span class="w">   </span><span class="c1"># Break on anti-debug function</span>
+
+<span class="c1"># Bypass timing checks</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>environment<span class="w"> </span><span class="nv">TZ</span><span class="o">=</span>UTC<span class="w">   </span><span class="c1"># Consistent timing</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>handle<span class="w"> </span>SIGALRM<span class="w"> </span>ignore<span class="w">    </span><span class="c1"># Ignore alarm signals</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="custom-gdb-scripts-and-automation">Custom GDB Scripts and Automation</h2>
+<h3 id="exploit-development-script">Exploit Development Script</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># exploit_helper.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gdb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ExploitHelper</span><span class="p">(</span><span class="n">gdb</span><span class="o">.</span><span class="n">Command</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExploitHelper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;exploit-helper&quot;</span><span class="p">,</span> <span class="n">gdb</span><span class="o">.</span><span class="n">COMMAND_USER</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">from_tty</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">show_help</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s2">&quot;find-offset&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">find_buffer_offset</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s2">&quot;find-gadgets&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">find_rop_gadgets</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s2">&quot;leak-stack&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">leak_stack_values</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_buffer_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find buffer overflow offset&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rip</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="s2">&quot;$rip&quot;</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RIP: 0x</span><span class="si">{</span><span class="n">rip</span><span class="si">:</span><span class="s2">016x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Check if RIP looks like pattern</span>
+            <span class="k">if</span> <span class="mh">0x4141414141414141</span> <span class="o">&lt;=</span> <span class="n">rip</span> <span class="o">&lt;=</span> <span class="mh">0x4242424242424242</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Controlled RIP detected!&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not analyze RIP&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_rop_gadgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find simple ROP gadgets&quot;&quot;&quot;</span>
+        <span class="c1"># Search for common gadgets</span>
+        <span class="n">gadgets</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x5f\xc3</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># pop rdi; ret</span>
+                  <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x5e\xc3</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># pop rsi; ret</span>
+                  <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xc3</span><span class="s1">&#39;</span><span class="p">]</span>      <span class="c1"># ret</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Searching for ROP gadgets...&quot;</span><span class="p">)</span>
+        <span class="c1"># Implementation would search memory for these patterns</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">leak_stack_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show stack values&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rsp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="s2">&quot;$rsp&quot;</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stack values:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+                <span class="n">addr</span> <span class="o">=</span> <span class="n">rsp</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">8</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">parse_and_eval</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;*(long*)0x</span><span class="si">{</span><span class="n">addr</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;0x</span><span class="si">{</span><span class="n">addr</span><span class="si">:</span><span class="s2">016x</span><span class="si">}</span><span class="s2">: 0x</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">:</span><span class="s2">016x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not read stack&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: exploit-helper &lt;command&gt;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Commands:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  find-offset  - Find buffer overflow offset&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  find-gadgets - Search for ROP gadgets&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  leak-stack   - Show stack values&quot;</span><span class="p">)</span>
+
+<span class="n">ExploitHelper</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="automated-vulnerability-detection">Automated Vulnerability Detection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># vuln_detect.gdb</span>
+define<span class="w"> </span>check_dangerous_functions
+<span class="w">    </span><span class="c1"># Check for gets</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nv">$_streq</span><span class="o">((</span>char*<span class="o">)</span><span class="nv">$arg0</span>,<span class="w"> </span><span class="s2">&quot;gets&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;WARNING: gets() detected - buffer overflow risk\n&quot;</span>
+<span class="w">    </span>end
+
+<span class="w">    </span><span class="c1"># Check for strcpy</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nv">$_streq</span><span class="o">((</span>char*<span class="o">)</span><span class="nv">$arg0</span>,<span class="w"> </span><span class="s2">&quot;strcpy&quot;</span><span class="o">)</span><span class="w"> </span>
+<span class="w">        </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;WARNING: strcpy() detected - buffer overflow risk\n&quot;</span>
+<span class="w">    </span>end
+end
+
+<span class="c1"># Hook function calls</span>
+<span class="k">break</span><span class="w"> </span>*__libc_start_main
+commands
+<span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;Program started, setting up hooks...\n&quot;</span>
+<span class="w">    </span><span class="k">break</span><span class="w"> </span>gets
+<span class="w">    </span>commands
+<span class="w">        </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;gets() called with buffer at %p\n&quot;</span>,<span class="w"> </span><span class="nv">$rdi</span>
+<span class="w">        </span><span class="k">continue</span>
+<span class="w">    </span>end
+<span class="w">    </span><span class="k">continue</span>
+end
+</code></pre></div></td></tr></table></div>
+<h2 id="integration-with-exploit-development">Integration with Exploit Development</h2>
+<h3 id="pwntools-gdb">pwntools + GDB</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pwn</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">context</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tmux&#39;</span><span class="p">,</span> <span class="s1">&#39;splitw&#39;</span><span class="p">,</span> <span class="s1">&#39;-h&#39;</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">debug_exploit</span><span class="p">():</span>
+    <span class="c1"># Start with GDB attached</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">gdb</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        set disassembly-flavor intel</span>
+<span class="s1">        break vulnerable_function</span>
+<span class="s1">        break *vulnerable_function+50</span>
+<span class="s1">        continue</span>
+<span class="s1">    &#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Wait for GDB to attach</span>
+    <span class="n">raw_input</span><span class="p">(</span><span class="s2">&quot;Press enter when ready...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Send exploit payload</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;A&#39;</span> <span class="o">*</span> <span class="mi">72</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x400000</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">debug_exploit</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="live-debugging-session">Live Debugging Session</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pwn</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">interactive_debug</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Attach GDB to running process</span>
+    <span class="n">gdb</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        set disassembly-flavor intel</span>
+<span class="s1">        break vulnerable_function</span>
+<span class="s1">        continue</span>
+<span class="s1">    &#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Continue with normal exploitation</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;trigger&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">interactive_debug</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="debugging-workflow">Debugging Workflow</h3>
+<ol>
+<li><strong>Set up environment</strong> - Configure GDB with PEDA/Pwndbg</li>
+<li><strong>Static analysis first</strong> - Understand program structure</li>
+<li><strong>Set strategic breakpoints</strong> - Function entries, dangerous calls</li>
+<li><strong>Trace execution</strong> - Follow program flow</li>
+<li><strong>Analyze crash state</strong> - Examine registers and stack</li>
+<li><strong>Develop exploit</strong> - Use findings to build payload</li>
+</ol>
+<h3 id="common-gdb-configurations">Common GDB Configurations</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># ~/.gdbinit</span>
+<span class="nb">set</span><span class="w"> </span>disassembly-flavor<span class="w"> </span>intel
+<span class="nb">set</span><span class="w"> </span>pagination<span class="w"> </span>off
+<span class="nb">set</span><span class="w"> </span>confirm<span class="w"> </span>off
+<span class="nb">set</span><span class="w"> </span>verbose<span class="w"> </span>off
+<span class="nb">set</span><span class="w"> </span>print<span class="w"> </span>pretty<span class="w"> </span>on
+<span class="nb">set</span><span class="w"> </span>print<span class="w"> </span>array<span class="w"> </span>on
+<span class="nb">set</span><span class="w"> </span>print<span class="w"> </span>array-indexes<span class="w"> </span>on
+<span class="nb">set</span><span class="w"> </span>python<span class="w"> </span>print-stack<span class="w"> </span>full
+
+<span class="c1"># Custom aliases</span>
+<span class="nb">alias</span><span class="w"> </span><span class="nv">assemble</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>language<span class="w"> </span>asm
+<span class="nb">alias</span><span class="w"> </span><span class="nv">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>context
+<span class="nb">alias</span><span class="w"> </span><span class="nv">telescope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>telescope
+</code></pre></div></td></tr></table></div>
+<h3 id="security-focused-analysis">Security-focused Analysis</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check for security features</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>checksec
+
+<span class="c1"># Find system calls</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>catch<span class="w"> </span>syscall<span class="w"> </span>write
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span>catch<span class="w"> </span>syscall<span class="w"> </span>execve
+
+<span class="c1"># Monitor library calls</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span><span class="nb">printf</span>
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>malloc
+<span class="o">(</span>gdb<span class="o">)</span><span class="w"> </span><span class="k">break</span><span class="w"> </span>free
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">GDB Fundamentals</p>
+<ul>
+<li><strong>Enhanced GDB</strong> (PEDA/Pwndbg) provides essential features for exploit development</li>
+<li><strong>Context awareness</strong> helps understand program state quickly</li>
+<li><strong>Pattern generation</strong> simplifies offset finding</li>
+<li><strong>Memory search</strong> capabilities aid in analysis</li>
+<li><strong>Automation through scripting</strong> increases efficiency</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Debugging Best Practices</p>
+<ul>
+<li>Start with static analysis before dynamic debugging</li>
+<li>Use strategic breakpoints rather than stepping through everything</li>
+<li>Learn keyboard shortcuts for common operations</li>
+<li>Practice with simple programs before complex targets</li>
+<li>Document findings and create reproducible scripts</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Common Pitfalls</p>
+<ul>
+<li>ASLR can change addresses between runs</li>
+<li>Debugger presence may alter program behavior</li>
+<li>Stack layout differs between debugged and normal execution</li>
+<li>Some anti-debugging techniques detect GDB</li>
+<li>Memory corruption may not be immediately visible</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../02-debugging/">Debugging Techniques</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

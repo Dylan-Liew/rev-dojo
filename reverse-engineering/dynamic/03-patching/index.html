@@ -1,0 +1,2033 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://dylan-liew.github.io/rev-dojo/reverse-engineering/dynamic/03-patching/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Binary Patching - Rev-Dojo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/custom.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#binary-patching" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rev-Dojo" class="md-header__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rev-Dojo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Binary Patching
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rev-Dojo" class="md-nav__button md-logo" aria-label="Rev-Dojo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rev-Dojo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Foundations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Foundations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-i/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials I
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/01-c-essentials-ii/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    C Programming Essentials II
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../foundations/02-compilation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compilation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#patching-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Patching Fundamentals
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Patching Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Patches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-patching-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Patching Scenarios
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-patching-with-hex-editors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Patching with Hex Editors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Patching with Hex Editors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-hexedit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using hexedit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#finding-patch-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finding Patch Locations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-nop-patch-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple NOP Patch Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-patching-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Patching Techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Patching Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-cave-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Cave Patching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-hooking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Function Hooking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#patching-tools-and-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Patching Tools and Frameworks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Patching Tools and Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-radare2-for-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using radare2 for Patching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ida-pro-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDA Pro Patching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghidra-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ghidra Patching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Runtime Patching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runtime Patching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dll-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      DLL Injection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-function-interposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linux Function Interposition
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automated-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Patching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automated Patching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-patching-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Patching Framework
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signature-based-patching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Signature-Based Patching
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-and-anti-tampering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and Anti-Tampering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security and Anti-Tampering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detecting-patches" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detecting Patches
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti-patching-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anti-Patching Techniques
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#patching-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Patching Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safe-patching-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Safe Patching Guidelines
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Takeaways
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="binary-patching">Binary Patching</h1>
+<p>Binary patching involves modifying executable files to change their behavior without access to source code. This technique is essential for bypassing protections, fixing bugs, and understanding program logic.</p>
+<h2 id="patching-fundamentals">Patching Fundamentals</h2>
+<h3 id="types-of-patches">Types of Patches</h3>
+<table>
+<thead>
+<tr>
+<th>Patch Type</th>
+<th>Purpose</th>
+<th>Complexity</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NOP Patch</td>
+<td>Disable functionality</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Jump Patch</td>
+<td>Redirect execution</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Code Cave</td>
+<td>Add new functionality</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Data Patch</td>
+<td>Modify constants/strings</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-patching-scenarios">Common Patching Scenarios</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// Original vulnerable code</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">check_password</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;secret123&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Success</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">      </span><span class="c1">// Failure</span>
+<span class="p">}</span>
+
+<span class="c1">// What we want to achieve:</span>
+<span class="c1">// 1. Always return success</span>
+<span class="c1">// 2. Change the password</span>
+<span class="c1">// 3. Add logging functionality</span>
+<span class="c1">// 4. Bypass the check entirely</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="manual-patching-with-hex-editors">Manual Patching with Hex Editors</h2>
+<h3 id="using-hexedit">Using hexedit</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Install hexedit</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>hexedit
+
+<span class="c1"># Open binary for editing</span>
+hexedit<span class="w"> </span>./target_binary
+
+<span class="c1"># Basic hexedit commands:</span>
+<span class="c1"># Ctrl+S: Save</span>
+<span class="c1"># Ctrl+X: Exit</span>
+<span class="c1"># F2: Save and exit</span>
+<span class="c1"># Tab: Switch between hex and ASCII</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="finding-patch-locations">Finding Patch Locations</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Find string locations</span>
+strings<span class="w"> </span>-t<span class="w"> </span>x<span class="w"> </span>target_binary<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;password&quot;</span>
+
+<span class="c1"># Find instruction patterns</span>
+objdump<span class="w"> </span>-d<span class="w"> </span>target_binary<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span>-B5<span class="w"> </span><span class="s2">&quot;cmp\|test\|jne\|je&quot;</span>
+
+<span class="c1"># Find specific byte patterns</span>
+hexdump<span class="w"> </span>-C<span class="w"> </span>target_binary<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;74 05&quot;</span><span class="w">  </span><span class="c1"># je instruction</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="simple-nop-patch-example">Simple NOP Patch Example</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Original assembly</span>
+<span class="err">0</span><span class="nl">x401234:</span><span class="w"> </span><span class="nf">cmp</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x1</span>
+<span class="err">0</span><span class="nl">x401237:</span><span class="w"> </span><span class="nf">jne</span><span class="w">    </span><span class="mi">0x401250</span><span class="w">    </span><span class="c1"># Jump if not equal (74 19)</span>
+<span class="err">0</span><span class="nl">x401239:</span><span class="w"> </span><span class="nf">mov</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x1</span><span class="w">    </span><span class="c1"># Success path</span>
+
+<span class="c1"># Patch: NOP out the conditional jump</span>
+<span class="c1"># Replace &quot;74 19&quot; with &quot;90 90&quot; (NOP NOP)</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Hex editor steps:</strong>
+1. Find address 0x401237 in hex editor
+2. Locate bytes "74 19"
+3. Replace with "90 90"
+4. Save file</p>
+<h2 id="advanced-patching-techniques">Advanced Patching Techniques</h2>
+<h3 id="code-cave-patching">Code Cave Patching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Problem: Need more space than available</span>
+<span class="c1"># Solution: Create a code cave</span>
+
+<span class="c1"># Original code (limited space):</span>
+<span class="err">0</span><span class="nl">x401234:</span><span class="w"> </span><span class="nf">cmp</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x1</span><span class="w">     </span><span class="c1"># 83 F8 01</span>
+<span class="err">0</span><span class="nl">x401237:</span><span class="w"> </span><span class="nf">jne</span><span class="w">    </span><span class="mi">0x401250</span><span class="w">     </span><span class="c1"># 75 17</span>
+<span class="err">0</span><span class="nl">x401239:</span><span class="w"> </span><span class="nf">mov</span><span class="w">    </span><span class="no">eax</span><span class="p">,</span><span class="w"> </span><span class="mi">0x1</span><span class="w">     </span><span class="c1"># B8 01 00 00 00</span>
+
+<span class="c1"># Step 1: Find unused space (code cave)</span>
+<span class="c1"># Look for areas of null bytes (00 00 00...)</span>
+
+<span class="c1"># Step 2: Write new functionality in cave</span>
+<span class="c1"># Address: 0x402000 (code cave)</span>
+<span class="err">0</span><span class="nl">x402000:</span><span class="w"> </span><span class="nf">push</span><span class="w">   </span><span class="no">rax</span><span class="w">          </span><span class="c1"># Save registers</span>
+<span class="err">0</span><span class="nl">x402001:</span><span class="w"> </span><span class="nf">push</span><span class="w">   </span><span class="no">rbx</span>
+<span class="err">0</span><span class="nl">x402002:</span><span class="w"> </span><span class="nf">mov</span><span class="w">    </span><span class="no">rax</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w">       </span><span class="c1"># Our new logic</span>
+<span class="err">0</span><span class="nl">x402007:</span><span class="w"> </span><span class="nf">pop</span><span class="w">    </span><span class="no">rbx</span><span class="w">          </span><span class="c1"># Restore registers  </span>
+<span class="err">0</span><span class="nl">x402008:</span><span class="w"> </span><span class="nf">pop</span><span class="w">    </span><span class="no">rax</span>
+<span class="err">0</span><span class="nl">x402009:</span><span class="w"> </span><span class="nf">jmp</span><span class="w">    </span><span class="mi">0x401239</span><span class="w">     </span><span class="c1"># Return to original flow</span>
+
+<span class="c1"># Step 3: Redirect original code to cave</span>
+<span class="err">0</span><span class="nl">x401234:</span><span class="w"> </span><span class="nf">jmp</span><span class="w">    </span><span class="mi">0x402000</span><span class="w">     </span><span class="c1"># E9 C7 0E 00 00</span>
+<span class="err">0</span><span class="nl">x401239:</span><span class="w"> </span><span class="nf">nop</span><span class="w">                 </span><span class="c1"># 90 (fill remaining bytes)</span>
+<span class="err">0</span><span class="nl">x40123A:</span><span class="w"> </span><span class="nf">nop</span><span class="w">                 </span><span class="c1"># 90</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="function-hooking">Function Hooking</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_function_hook</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a function hook using binary patching&quot;&quot;&quot;</span>
+
+    <span class="c1"># Original function entry</span>
+    <span class="n">original_entry</span> <span class="o">=</span> <span class="mh">0x401000</span>
+
+    <span class="c1"># Our hook function (in code cave)</span>
+    <span class="n">hook_function</span> <span class="o">=</span> <span class="mh">0x402000</span>
+
+    <span class="c1"># Calculate jump offset</span>
+    <span class="n">jump_offset</span> <span class="o">=</span> <span class="n">hook_function</span> <span class="o">-</span> <span class="p">(</span><span class="n">original_entry</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5 bytes for jmp instruction</span>
+
+    <span class="c1"># Create jump instruction (E9 = jmp rel32)</span>
+    <span class="n">jump_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xE9</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">jump_offset</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patch bytes: </span><span class="si">{</span><span class="n">jump_bytes</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Hook function assembly (at 0x402000)</span>
+    <span class="n">hook_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    push rax        ; Save registers</span>
+<span class="s2">    push rbx</span>
+<span class="s2">    push rcx</span>
+
+<span class="s2">    ; Our custom logic here</span>
+<span class="s2">    mov rax, 42     ; Example: always return 42</span>
+
+<span class="s2">    pop rcx         ; Restore registers</span>
+<span class="s2">    pop rbx</span>
+<span class="s2">    pop rax</span>
+
+<span class="s2">    ; Jump back to original function (after our patch)</span>
+<span class="s2">    jmp original_function + 5</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">jump_bytes</span><span class="p">,</span> <span class="n">hook_code</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_binary_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">new_bytes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply patch to binary file&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+    <span class="c1"># Create backup</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;.backup&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r+b&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes at offset 0x</span><span class="si">{</span><span class="n">offset</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="patching-tools-and-frameworks">Patching Tools and Frameworks</h2>
+<h3 id="using-radare2-for-patching">Using radare2 for Patching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Open binary in write mode</span>
+r2<span class="w"> </span>-w<span class="w"> </span>./target_binary
+
+<span class="c1"># Analyze binary</span>
+aaa
+
+<span class="c1"># Seek to function</span>
+s<span class="w"> </span>sym.check_password
+
+<span class="c1"># View assembly</span>
+pdf
+
+<span class="c1"># Patch instructions</span>
+wa<span class="w"> </span>mov<span class="w"> </span>eax,<span class="w"> </span><span class="m">1</span><span class="w">      </span><span class="c1"># Write assembly instruction</span>
+wa<span class="w"> </span>nop<span class="w">             </span><span class="c1"># Write NOP</span>
+wa<span class="w"> </span>ret<span class="w">             </span><span class="c1"># Write return</span>
+
+<span class="c1"># Patch bytes directly</span>
+wx<span class="w"> </span><span class="m">909090</span><span class="w">          </span><span class="c1"># Write hex bytes (3 NOPs)</span>
+
+<span class="c1"># Save changes</span>
+q
+</code></pre></div></td></tr></table></div>
+<h3 id="ida-pro-patching">IDA Pro Patching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># IDAPython script for patching</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">idaapi</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">idc</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_instruction</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">new_bytes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Patch instruction at given address&quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert hex string to bytes if needed</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">new_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">)</span>
+
+    <span class="c1"># Apply patch</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">):</span>
+        <span class="n">idc</span><span class="o">.</span><span class="n">patch_byte</span><span class="p">(</span><span class="n">addr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_bytes</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">nop_function</span><span class="p">(</span><span class="n">func_addr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NOP out entire function&quot;&quot;&quot;</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">idaapi</span><span class="o">.</span><span class="n">get_func</span><span class="p">(</span><span class="n">func_addr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Function not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># NOP from start to end</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">start_ea</span>
+    <span class="k">while</span> <span class="n">addr</span> <span class="o">&lt;</span> <span class="n">func</span><span class="o">.</span><span class="n">end_ea</span><span class="p">:</span>
+        <span class="n">idc</span><span class="o">.</span><span class="n">patch_byte</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="mh">0x90</span><span class="p">)</span>  <span class="c1"># NOP</span>
+        <span class="n">addr</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NOPed function at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">func_addr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">always_return_true</span><span class="p">(</span><span class="n">func_addr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Patch function to always return 1&quot;&quot;&quot;</span>
+
+    <span class="c1"># mov eax, 1; ret (B8 01 00 00 00 C3)</span>
+    <span class="n">patch_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xB8\x01\x00\x00\x00\xC3</span><span class="s1">&#39;</span>
+
+    <span class="c1"># Apply patch at function start</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patch_bytes</span><span class="p">):</span>
+        <span class="n">idc</span><span class="o">.</span><span class="n">patch_byte</span><span class="p">(</span><span class="n">func_addr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">byte</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Function at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">func_addr</span><span class="p">)</span><span class="si">}</span><span class="s2"> will always return 1&quot;</span><span class="p">)</span>
+
+<span class="c1"># Usage examples</span>
+<span class="n">patch_instruction</span><span class="p">(</span><span class="mh">0x401234</span><span class="p">,</span> <span class="s2">&quot;9090&quot;</span><span class="p">)</span>  <span class="c1"># NOP out 2 bytes</span>
+<span class="n">always_return_true</span><span class="p">(</span><span class="mh">0x401000</span><span class="p">)</span>         <span class="c1"># Make function return true</span>
+<span class="n">nop_function</span><span class="p">(</span><span class="mh">0x401500</span><span class="p">)</span>               <span class="c1"># Disable entire function</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="ghidra-patching">Ghidra Patching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// Ghidra script for patching</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.app.script.GhidraScript</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.address.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.listing.*</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ghidra.program.model.mem.*</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BinaryPatcher</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">GhidraScript</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Get current program</span>
+<span class="w">        </span><span class="n">Program</span><span class="w"> </span><span class="n">program</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCurrentProgram</span><span class="p">();</span>
+<span class="w">        </span><span class="n">Memory</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program</span><span class="p">.</span><span class="na">getMemory</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Find address to patch</span>
+<span class="w">        </span><span class="n">Address</span><span class="w"> </span><span class="n">patchAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toAddr</span><span class="p">(</span><span class="mh">0x401234</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Create patch bytes</span>
+<span class="w">        </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">nopBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{(</span><span class="kt">byte</span><span class="p">)</span><span class="mh">0x90</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">byte</span><span class="p">)</span><span class="mh">0x90</span><span class="p">};</span>
+
+<span class="w">        </span><span class="c1">// Apply patch</span>
+<span class="w">        </span><span class="n">memory</span><span class="p">.</span><span class="na">setBytes</span><span class="p">(</span><span class="n">patchAddr</span><span class="p">,</span><span class="w"> </span><span class="n">nopBytes</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Patched %d bytes at %s\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">nopBytes</span><span class="p">.</span><span class="na">length</span><span class="p">,</span><span class="w"> </span><span class="n">patchAddr</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">patchFunction</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">functionName</span><span class="p">,</span><span class="w"> </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">patchBytes</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Function</span><span class="w"> </span><span class="n">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getFunction</span><span class="p">(</span><span class="n">functionName</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">func</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Function %s not found\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">functionName</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">Address</span><span class="w"> </span><span class="n">funcAddr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">.</span><span class="na">getEntryPoint</span><span class="p">();</span>
+<span class="w">        </span><span class="n">getCurrentProgram</span><span class="p">().</span><span class="na">getMemory</span><span class="p">().</span><span class="na">setBytes</span><span class="p">(</span><span class="n">funcAddr</span><span class="p">,</span><span class="w"> </span><span class="n">patchBytes</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Patched function %s at %s\n&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">functionName</span><span class="p">,</span><span class="w"> </span><span class="n">funcAddr</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createAlwaysTrue</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">functionName</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// mov eax, 1; ret</span>
+<span class="w">        </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">alwaysTrue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{(</span><span class="kt">byte</span><span class="p">)</span><span class="mh">0xB8</span><span class="p">,</span><span class="w"> </span><span class="mh">0x01</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">byte</span><span class="p">)</span><span class="mh">0xC3</span><span class="p">};</span>
+<span class="w">        </span><span class="n">patchFunction</span><span class="p">(</span><span class="n">functionName</span><span class="p">,</span><span class="w"> </span><span class="n">alwaysTrue</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="runtime-patching">Runtime Patching</h2>
+<h3 id="dll-injection">DLL Injection</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// hook.cpp - DLL for runtime patching</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;windows.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;detours.h&gt;</span>
+
+<span class="c1">// Original function pointer</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="n">WINAPI</span><span class="o">*</span><span class="w"> </span><span class="n">TrueCheckPassword</span><span class="p">)(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CheckPassword</span><span class="p">;</span>
+
+<span class="c1">// Our hook function</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">WINAPI</span><span class="w"> </span><span class="nf">HookedCheckPassword</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Log the attempt</span>
+<span class="w">    </span><span class="n">OutputDebugStringA</span><span class="p">(</span><span class="s">&quot;Password check intercepted&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Always return success</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">BOOL</span><span class="w"> </span><span class="n">APIENTRY</span><span class="w"> </span><span class="n">DllMain</span><span class="p">(</span><span class="n">HMODULE</span><span class="w"> </span><span class="n">hModule</span><span class="p">,</span><span class="w"> </span><span class="n">DWORD</span><span class="w"> </span><span class="n">dwReason</span><span class="p">,</span><span class="w"> </span><span class="n">LPVOID</span><span class="w"> </span><span class="n">lpReserved</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">dwReason</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">DLL_PROCESS_ATTACH</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Install hook</span>
+<span class="w">        </span><span class="n">DetourTransactionBegin</span><span class="p">();</span>
+<span class="w">        </span><span class="n">DetourUpdateThread</span><span class="p">(</span><span class="n">GetCurrentThread</span><span class="p">());</span>
+<span class="w">        </span><span class="n">DetourAttach</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">PVOID</span><span class="o">&amp;</span><span class="p">)</span><span class="n">TrueCheckPassword</span><span class="p">,</span><span class="w"> </span><span class="n">HookedCheckPassword</span><span class="p">);</span>
+<span class="w">        </span><span class="n">DetourTransactionCommit</span><span class="p">();</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">DLL_PROCESS_DETACH</span><span class="p">:</span>
+<span class="w">        </span><span class="c1">// Remove hook</span>
+<span class="w">        </span><span class="n">DetourTransactionBegin</span><span class="p">();</span>
+<span class="w">        </span><span class="n">DetourUpdateThread</span><span class="p">(</span><span class="n">GetCurrentThread</span><span class="p">());</span>
+<span class="w">        </span><span class="n">DetourDetach</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">PVOID</span><span class="o">&amp;</span><span class="p">)</span><span class="n">TrueCheckPassword</span><span class="p">,</span><span class="w"> </span><span class="n">HookedCheckPassword</span><span class="p">);</span>
+<span class="w">        </span><span class="n">DetourTransactionCommit</span><span class="p">();</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">TRUE</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="linux-function-interposition">Linux Function Interposition</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// hook.c - LD_PRELOAD library</span>
+<span class="cp">#define _GNU_SOURCE</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;dlfcn.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+
+<span class="c1">// Hook strcmp function</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">strcmp</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Get original function</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">original_strcmp</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">original_strcmp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">original_strcmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dlsym</span><span class="p">(</span><span class="n">RTLD_NEXT</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;strcmp&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Log the comparison</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;strcmp called: &#39;%s&#39; vs &#39;%s&#39;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Check if it&#39;s a password comparison</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strstr</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Password comparison detected - returning match</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Always match</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Call original function</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">original_strcmp</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>Usage:</strong>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Compile hook library</span>
+gcc<span class="w"> </span>-shared<span class="w"> </span>-fPIC<span class="w"> </span>-o<span class="w"> </span>hook.so<span class="w"> </span>hook.c<span class="w"> </span>-ldl
+
+<span class="c1"># Use with target program</span>
+<span class="nv">LD_PRELOAD</span><span class="o">=</span>./hook.so<span class="w"> </span>./target_program
+</code></pre></div></td></tr></table></div></p>
+<h2 id="automated-patching">Automated Patching</h2>
+<h3 id="python-patching-framework">Python Patching Framework</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BinaryPatcher</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span> <span class="o">=</span> <span class="n">binary_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup_path</span> <span class="o">=</span> <span class="n">binary_path</span> <span class="o">+</span> <span class="s1">&#39;.backup&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Create backup</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup_path</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a patch to be applied&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">offset</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">nop_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;NOP out specified number of bytes&quot;&quot;&quot;</span>
+        <span class="n">nop_data</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x90</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="n">count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">nop_data</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">patch_jump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">from_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">to_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Patch a jump instruction&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate relative offset</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">to_addr</span> <span class="o">-</span> <span class="p">(</span><span class="n">from_addr</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5 bytes for jmp instruction</span>
+
+        <span class="c1"># Create jump instruction (E9 = jmp rel32)</span>
+        <span class="n">jump_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xE9</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">from_addr</span><span class="p">,</span> <span class="n">jump_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">patch_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">from_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">to_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Patch a call instruction&quot;&quot;&quot;</span>
+        <span class="c1"># Calculate relative offset</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">to_addr</span> <span class="o">-</span> <span class="p">(</span><span class="n">from_addr</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5 bytes for call instruction</span>
+
+        <span class="c1"># Create call instruction (E8 = call rel32)</span>
+        <span class="n">call_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xE8</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;i&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">from_addr</span><span class="p">,</span> <span class="n">call_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">patch_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">new_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace string at offset&quot;&quot;&quot;</span>
+        <span class="n">string_bytes</span> <span class="o">=</span> <span class="n">new_string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">string_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">always_return_true</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make function always return 1&quot;&quot;&quot;</span>
+        <span class="c1"># mov eax, 1; ret</span>
+        <span class="n">patch_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xB8\x01\x00\x00\x00\xC3</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">func_addr</span><span class="p">,</span> <span class="n">patch_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">always_return_false</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make function always return 0&quot;&quot;&quot;</span>
+        <span class="c1"># xor eax, eax; ret</span>
+        <span class="n">patch_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x31\xC0\xC3</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">func_addr</span><span class="p">,</span> <span class="n">patch_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find all occurrences of a byte pattern&quot;&quot;&quot;</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">offsets</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply all queued patches&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patches</span><span class="p">)</span><span class="si">}</span><span class="s2"> patches...&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patches</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_data</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Patch at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span><span class="si">}</span><span class="s2"> extends beyond file&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Apply patch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binary_data</span><span class="p">[</span><span class="n">offset</span><span class="p">:</span><span class="n">offset</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patched </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> bytes at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write patched binary</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_data</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patching complete. Backup saved as </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">restore_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore original binary from backup&quot;&quot;&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backup_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Binary restored from backup&quot;</span><span class="p">)</span>
+
+<span class="c1"># Usage example</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_crackme</span><span class="p">():</span>
+    <span class="n">patcher</span> <span class="o">=</span> <span class="n">BinaryPatcher</span><span class="p">(</span><span class="s1">&#39;./crackme&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Find password check function</span>
+    <span class="n">password_check_addr</span> <span class="o">=</span> <span class="mh">0x401000</span>
+
+    <span class="c1"># Make it always return true</span>
+    <span class="n">patcher</span><span class="o">.</span><span class="n">always_return_true</span><span class="p">(</span><span class="n">password_check_addr</span><span class="p">)</span>
+
+    <span class="c1"># Change password string</span>
+    <span class="n">password_string_offset</span> <span class="o">=</span> <span class="mh">0x2000</span>
+    <span class="n">patcher</span><span class="o">.</span><span class="n">patch_string</span><span class="p">(</span><span class="n">password_string_offset</span><span class="p">,</span> <span class="s2">&quot;newpassword&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Apply all patches</span>
+    <span class="n">patcher</span><span class="o">.</span><span class="n">apply_patches</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">patch_crackme</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="signature-based-patching">Signature-Based Patching</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SignaturePatcher</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span> <span class="o">=</span> <span class="n">binary_path</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find addresses matching byte signature with wildcards&quot;&quot;&quot;</span>
+        <span class="c1"># Convert signature to regex pattern</span>
+        <span class="c1"># Example: &quot;48 8B ?? 83 F8 01&quot; -&gt; rb&#39;\x48\x8B..\x83\xF8\x01&#39;</span>
+
+        <span class="n">pattern_bytes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="s1">&#39;??&#39;</span><span class="p">:</span>
+                <span class="n">pattern_bytes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pattern_bytes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="mi">16</span><span class="p">)]))</span>
+
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pattern_bytes</span><span class="p">)</span>
+
+        <span class="c1"># Find all matches</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">):</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">matches</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">patch_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Patch all instances matching signature&quot;&quot;&quot;</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_signature</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">addr</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="c1"># Verify signature length matches replacement</span>
+            <span class="n">sig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span> <span class="o">!=</span> <span class="n">sig_len</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Replacement length mismatch at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Apply patch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">addr</span><span class="p">:</span><span class="n">addr</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">replacement</span><span class="p">)]</span> <span class="o">=</span> <span class="n">replacement</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Patched signature at </span><span class="si">{</span><span class="nb">hex</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save patched binary&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_path</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Example: Patch all conditional jumps to unconditional</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_conditional_jumps</span><span class="p">():</span>
+    <span class="n">patcher</span> <span class="o">=</span> <span class="n">SignaturePatcher</span><span class="p">(</span><span class="s1">&#39;./target&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Find conditional jump patterns and replace with unconditional jumps</span>
+    <span class="c1"># je (74 ??) -&gt; jmp (EB ??)</span>
+    <span class="n">patcher</span><span class="o">.</span><span class="n">patch_signature</span><span class="p">(</span><span class="s2">&quot;74 ??&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xEB\x00</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># Replace with jmp short</span>
+
+    <span class="c1"># jne (75 ??) -&gt; jmp (EB ??)  </span>
+    <span class="n">patcher</span><span class="o">.</span><span class="n">patch_signature</span><span class="p">(</span><span class="s2">&quot;75 ??&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xEB\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">patcher</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;./target_patched&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="security-and-anti-tampering">Security and Anti-Tampering</h2>
+<h3 id="detecting-patches">Detecting Patches</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_modifications</span><span class="p">(</span><span class="n">original_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">suspected_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect if binary has been modified&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">file_hash</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+    <span class="n">original_hash</span> <span class="o">=</span> <span class="n">file_hash</span><span class="p">(</span><span class="n">original_file</span><span class="p">)</span>
+    <span class="n">suspected_hash</span> <span class="o">=</span> <span class="n">file_hash</span><span class="p">(</span><span class="n">suspected_file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">original_hash</span> <span class="o">!=</span> <span class="n">suspected_hash</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Binary has been modified!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Binary appears unchanged&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_common_patches</span><span class="p">(</span><span class="n">binary_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for common patching signatures&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1"># Check for excessive NOPs (possible patch)</span>
+    <span class="n">nop_sequences</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x90</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># 10+ consecutive NOPs</span>
+    <span class="k">if</span> <span class="n">nop_sequences</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">nop_sequences</span><span class="si">}</span><span class="s2"> suspicious NOP sequences&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for unexpected jump instructions</span>
+    <span class="n">long_jumps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xE9</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># JMP near</span>
+    <span class="k">if</span> <span class="n">long_jumps</span> <span class="o">&gt;</span> <span class="n">expected_jumps</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unusual number of jump instructions: </span><span class="si">{</span><span class="n">long_jumps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for code caves (null byte regions)</span>
+    <span class="n">null_regions</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">{50,}&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1"># 50+ null bytes</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">null_regions</span><span class="p">)</span><span class="si">}</span><span class="s2"> potential code caves&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="anti-patching-techniques">Anti-Patching Techniques</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// anti_patch.c - Self-integrity checking</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+
+<span class="c1">// Calculate checksum of code section</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">calculate_checksum</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">length</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">checksum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">start</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">length</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">checksum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">bytes</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">checksum</span><span class="w"> </span><span class="o">^=</span><span class="w"> </span><span class="p">(</span><span class="n">checksum</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">checksum</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Anti-patching check</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">integrity_check</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">extern</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">__text_start</span><span class="p">,</span><span class="w"> </span><span class="n">__text_end</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">text_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">__text_end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">&amp;</span><span class="n">__text_start</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Expected checksum (calculated at compile time)</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">expected_checksum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x12345678</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">current_checksum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calculate_checksum</span><span class="p">(</span><span class="o">&amp;</span><span class="n">__text_start</span><span class="p">,</span><span class="w"> </span><span class="n">text_size</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">current_checksum</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">expected_checksum</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Integrity check failed - binary may be patched</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">integrity_check</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Rest of program...</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Integrity check passed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="patching-workflow">Patching Workflow</h3>
+<ol>
+<li><strong>Backup original binary</strong> - Always create backups before patching</li>
+<li><strong>Test patches</strong> - Verify patches work as expected</li>
+<li><strong>Document changes</strong> - Keep track of what was modified</li>
+<li><strong>Minimal changes</strong> - Make smallest possible modifications</li>
+<li><strong>Verify functionality</strong> - Ensure program still works correctly</li>
+</ol>
+<h3 id="safe-patching-guidelines">Safe Patching Guidelines</h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">safe_patching_checklist</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checklist for safe binary patching&quot;&quot;&quot;</span>
+
+    <span class="n">checklist</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;✓ Created backup of original binary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;✓ Identified exact patch location&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;✓ Calculated correct instruction bytes&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;✓ Verified patch doesn&#39;t break alignment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;✓ Tested patch in isolated environment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;✓ Documented all changes made&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;✓ Have rollback plan ready&quot;</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">checklist</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_validation</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate patch before applying&quot;&quot;&quot;</span>
+
+    <span class="c1"># Check file permissions</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">binary_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Binary is not writable&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if binary is currently running</span>
+    <span class="k">if</span> <span class="n">is_process_running</span><span class="p">(</span><span class="n">binary_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot patch running binary&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Verify patch location is in executable section</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_executable_section</span><span class="p">(</span><span class="n">patch_address</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Patch location is not executable&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for sufficient space</span>
+    <span class="k">if</span> <span class="n">patch_size</span> <span class="o">&gt;</span> <span class="n">available_space</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Insufficient space for patch&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<div class="admonition important">
+<p class="admonition-title">Binary Patching Fundamentals</p>
+<ul>
+<li><strong>Always backup</strong> original binaries before patching</li>
+<li><strong>Understand target architecture</strong> - x86 vs x64 instructions differ</li>
+<li><strong>Use appropriate tools</strong> - Hex editors for simple patches, specialized tools for complex ones</li>
+<li><strong>Test thoroughly</strong> - Verify patches work in all scenarios</li>
+<li><strong>Consider alternatives</strong> - Runtime hooking may be better than permanent patches</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Patching Best Practices</p>
+<ul>
+<li>Start with simple NOP patches before attempting complex modifications</li>
+<li>Use automated tools to reduce human error</li>
+<li>Document all changes for future reference</li>
+<li>Test patches on copies, never on production binaries</li>
+<li>Understand the original code before modifying it</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Common Pitfalls</p>
+<ul>
+<li>Incorrectly calculating jump offsets</li>
+<li>Patching in non-executable sections</li>
+<li>Breaking instruction alignment</li>
+<li>Overwriting critical code sections</li>
+<li>Not accounting for anti-tamper mechanisms</li>
+</ul>
+</div>
+<hr />
+<p><em>Next: <a href="../../01-symbolic-execution/">Advanced Techniques - Symbolic Execution</a></em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "search.highlight"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>
